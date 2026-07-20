@@ -1,0 +1,6 @@
+{
+  "name": "Miracle Game",
+  "description": "A contemplative full-screen game of architectural obsidian pathways, emerald waters, and sparkling daily reflections, guided by the Miracle Game Design System and Gemini AI.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
