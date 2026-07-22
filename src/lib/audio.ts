@@ -1,5 +1,5 @@
 /**
- * Web Audio API synthesizer for the Miracle Sanctuary.
+ * Web Audio API synthesizer for Miracle: The Living House.
  * Synthesizes persistent water ambiance and short audio events.
  * Fully compliant with the 'muted until direct user gesture' policy.
  */

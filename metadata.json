@@ -1,6 +1,6 @@
 {
-  "name": "Miracle Game",
-  "description": "A contemplative full-screen game of architectural obsidian pathways, emerald waters, and sparkling daily reflections, guided by the Miracle Game Design System and Gemini AI.",
+  "name": "Miracle: The Living House",
+  "description": "A contemplative full-screen life game built with frosted glass, obsidian architecture, emerald light, responsive sound, and meaningful daily reflection.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

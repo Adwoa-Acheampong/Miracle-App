@@ -36,7 +36,7 @@ export default function App() {
       {
         id: "init",
         amount: 25,
-        reason: "Entered the Sanctuary with a clean heart",
+        reason: "The house remembered your first step",
         timestamp: new Date().toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })
       }
     ];
@@ -63,7 +63,7 @@ export default function App() {
     playSoundConfirm();
   };
 
-  const handleBeginPilgrimage = () => {
+  const handleWakeHouse = () => {
     setShowIntro(false);
     // Auto-enable audio on this direct gesture!
     setIsMuted(false);
@@ -95,7 +95,7 @@ export default function App() {
   };
 
   return (
-    <main className="relative w-screen h-screen overflow-hidden flex items-center justify-center text-[#f8fafc] font-sans">
+    <main className="relative w-screen h-screen overflow-hidden flex items-center justify-center text-[#F7FAF8] font-sans">
       
       {/* Mesh background and blurred colorful blobs behind everything */}
       <div className="mesh-bg">
@@ -106,38 +106,39 @@ export default function App() {
 
       {/* 1. INTRO/SPLASH COVER (User gesture for audio activation & beautiful presentation) */}
       {showIntro ? (
-        <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-[#0f172a]/60 backdrop-blur-md px-6 text-center">
+        <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-[#050806]/60 backdrop-blur-md px-6 text-center">
           
           <div className="relative space-y-6 max-w-sm p-8 rounded-3xl glass-card z-10">
             {/* Elegant Vector Aura Icon */}
             <div className="relative w-16 h-16 mx-auto flex items-center justify-center">
-              <div className="absolute inset-0 rounded-full border border-indigo-500/40 animate-pulse" />
+              <div className="absolute inset-0 rounded-full border border-emerald-500/40 animate-pulse" />
               <div className="w-12 h-12 rounded-full glass-card flex items-center justify-center">
-                <Compass className="w-5 h-5 text-[#a855f7]" />
+                <Compass className="w-5 h-5 text-[#34D399]" />
               </div>
             </div>
 
             <div className="space-y-2">
-              <h1 className="text-xl font-normal tracking-[0.15em] text-[#f5f3ff] uppercase">
-                MIRACLE SANCTUARY
+              <h1 className="text-xl font-normal tracking-[0.15em] text-[#ECFDF5] uppercase">
+                MIRACLE: THE LIVING HOUSE
               </h1>
-              <p className="font-serif italic text-sm text-[#94a3b8] leading-relaxed px-4">
-                “There are only two ways to live your life. One is as though nothing is a miracle. The other is as though everything is a miracle.”
+              <p className="font-serif italic text-sm text-[#9AAFA3] leading-relaxed px-4">
+                “Wake the house. Decide what matters. Let the world remember.”
               </p>
             </div>
 
             <div className="pt-2">
               <button
-                onClick={handleBeginPilgrimage}
-                className="py-3.5 px-8 bg-white text-indigo-950 font-bold text-xs tracking-widest rounded-full transition-all duration-300 uppercase shadow-lg select-none active:scale-95"
+                onClick={handleWakeHouse}
+                onPointerEnter={playSoundEnter}
+                className="py-3.5 px-8 bg-white text-emerald-950 font-bold text-xs tracking-widest rounded-full transition-all duration-300 uppercase shadow-lg select-none active:scale-95"
                 style={{ minHeight: 44, minWidth: 200 }}
               >
-                Begin Pilgrimage
+                Wake the House
               </button>
             </div>
 
-            <div className="pt-4 flex items-center justify-center gap-1.5 text-[10px] text-[#94a3b8] uppercase tracking-wider">
-              <Music className="w-3.5 h-3.5 text-[#a855f7] animate-pulse" />
+            <div className="pt-4 flex items-center justify-center gap-1.5 text-[10px] text-[#9AAFA3] uppercase tracking-wider">
+              <Music className="w-3.5 h-3.5 text-[#34D399] animate-pulse" />
               <span>Enables synthesized ambient water sounds</span>
             </div>
           </div>
@@ -155,10 +156,10 @@ export default function App() {
             className="pointer-events-auto flex items-center gap-2 px-3 py-1.5 glass-card rounded-full"
             title="Miracle Sparkles Ledger"
           >
-            <Sparkles className="w-3.5 h-3.5 text-[#a855f7] animate-pulse" />
+            <Sparkles className="w-3.5 h-3.5 text-[#34D399] animate-pulse" />
             <div className="flex flex-col">
-              <span className="text-[8px] uppercase tracking-wider text-[#94a3b8] leading-none">Sparks</span>
-              <span className="font-mono text-xs text-[#f5f3ff] font-semibold leading-none mt-0.5">{sparkles}</span>
+              <span className="text-[8px] uppercase tracking-wider text-[#9AAFA3] leading-none">Sparks</span>
+              <span className="font-mono text-xs text-[#ECFDF5] font-semibold leading-none mt-0.5">{sparkles}</span>
             </div>
           </div>
 
@@ -168,10 +169,12 @@ export default function App() {
             {/* Discovered Chronicles Button */}
             <button
               onClick={() => handleOpenSheet("history")}
+              onPointerEnter={playSoundEnter}
+              aria-label="Open chronicles"
               className={`p-2.5 rounded-full border glass-card transition-all duration-150 flex items-center justify-center ${
                 activeSheet === "history" 
-                  ? "border-[#a855f7] text-[#f5f3ff]" 
-                  : "border-white/10 text-[#94a3b8] hover:text-[#f5f3ff]"
+                  ? "border-[#34D399] text-[#ECFDF5]"
+                  : "border-white/10 text-[#9AAFA3] hover:text-[#ECFDF5]"
               }`}
               style={{ minWidth: 44, minHeight: 44 }}
               title="Sacred Chronicles"
@@ -182,10 +185,12 @@ export default function App() {
             {/* Quests Tracker Button */}
             <button
               onClick={() => handleOpenSheet("quest")}
+              onPointerEnter={playSoundEnter}
+              aria-label="Open quests"
               className={`p-2.5 rounded-full border glass-card transition-all duration-150 flex items-center justify-center ${
                 activeSheet === "quest" 
-                  ? "border-[#a855f7] text-[#f5f3ff]" 
-                  : "border-white/10 text-[#94a3b8] hover:text-[#f5f3ff]"
+                  ? "border-[#34D399] text-[#ECFDF5]"
+                  : "border-white/10 text-[#9AAFA3] hover:text-[#ECFDF5]"
               }`}
               style={{ minWidth: 44, minHeight: 44 }}
               title="Quests Tracker"
@@ -196,10 +201,12 @@ export default function App() {
             {/* Ambient Synthesizer Mute Control */}
             <button
               onClick={toggleMute}
+              onPointerEnter={playSoundEnter}
+              aria-label={isMuted ? "Turn sound on" : "Turn sound off"}
               className={`p-2.5 rounded-full border glass-card transition-all duration-150 flex items-center justify-center ${
                 !isMuted 
-                  ? "border-[#a855f7] text-[#a855f7]" 
-                  : "border-white/10 text-[#94a3b8] hover:text-[#f5f3ff]"
+                  ? "border-[#34D399] text-[#34D399]"
+                  : "border-white/10 text-[#9AAFA3] hover:text-[#ECFDF5]"
               }`}
               style={{ minWidth: 44, minHeight: 44 }}
               title={isMuted ? "Unmute Ambient Sound" : "Mute Ambient Sound"}
@@ -218,8 +225,8 @@ export default function App() {
 
         {/* BOTTOM HUD HELP ACCENTS */}
         <footer className="absolute bottom-4 left-0 right-0 z-30 pointer-events-none flex flex-col items-center gap-1 text-center">
-          <p className="text-[10px] text-[#94a3b8] uppercase tracking-[0.12em] glass-card py-1.5 px-4 rounded-full">
-            Tap the sacred sites to seek reflections or align breath
+          <p className="text-[10px] text-[#9AAFA3] uppercase tracking-[0.12em] glass-card py-1.5 px-4 rounded-full">
+            Tap a glowing place to move, listen, and act
           </p>
         </footer>
 
