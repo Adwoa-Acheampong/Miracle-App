@@ -1,0 +1,28 @@
+{
+  "name": "Miracle: The Living House",
+  "short_name": "Miracle",
+  "description": "A living house shaped by your faith, work, care, and memory.",
+  "id": "/game-preview/",
+  "start_url": "/game-preview/",
+  "scope": "/game-preview/",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "orientation": "portrait-primary",
+  "theme_color": "#020403",
+  "background_color": "#020403",
+  "categories": ["lifestyle", "productivity", "games"],
+  "shortcuts": [
+    {
+      "name": "Open the house",
+      "short_name": "House",
+      "url": "/game-preview/",
+      "icons": [{ "src": "../assets/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    }
+  ],
+  "icons": [
+    { "src": "../assets/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "../assets/apple-touch-icon.png", "sizes": "180x180", "type": "image/png", "purpose": "any" },
+    { "src": "../assets/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "../assets/icon-maskable.svg", "sizes": "512x512", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}

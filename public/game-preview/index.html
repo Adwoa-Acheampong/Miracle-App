@@ -1,0 +1,461 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+  <meta name="theme-color" content="#020403">
+  <meta name="color-scheme" content="dark">
+  <meta name="miracle-build" content="__BUILD__">
+  <title>Miracle: The Living House</title>
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+  <link rel="manifest" href="./manifest.json?v=__BUILD__">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=DM+Sans:opsz,wght@9..40,300..600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./game.css?v=__BUILD__">
+  <link rel="stylesheet" href="./glass-system.css?v=__BUILD__">
+</head>
+<body class="glass-system">
+  <main class="game" id="game" data-phase="gate">
+    <div class="scene" id="scene" aria-hidden="true"></div>
+    <div class="scene-vignette" aria-hidden="true"></div>
+    <div class="scene-transition" id="scene-transition" aria-hidden="true" hidden><span></span></div>
+
+    <section class="auth-world" id="auth-world" role="dialog" aria-modal="true" aria-labelledby="auth-title" hidden>
+      <div class="auth-mark" aria-hidden="true"><span></span></div>
+      <p class="eyebrow">Miracle · The Living House</p>
+      <h1 id="auth-title">Welcome home</h1>
+      <p class="auth-reflection">A quiet place for faith, work, care, and memory.</p>
+      <div class="auth-tabs" role="tablist" aria-label="Account action">
+        <button type="button" role="tab" data-auth-mode="login" aria-selected="true">Log in</button>
+        <button type="button" role="tab" data-auth-mode="signup" aria-selected="false">Create account</button>
+      </div>
+      <form class="auth-form" id="auth-form" novalidate>
+        <label class="game-field auth-name" for="auth-name" hidden><span>Name</span><input id="auth-name" name="name" type="text" maxlength="120" autocomplete="name"></label>
+        <label class="game-field" for="auth-email"><span>Email</span><input id="auth-email" name="email" type="email" autocomplete="email" required></label>
+        <label class="game-field" for="auth-password"><span>Password</span><input id="auth-password" name="password" type="password" minlength="8" autocomplete="current-password" required></label>
+        <p class="field-error auth-status" id="auth-status" role="status" aria-live="polite"></p>
+        <button class="panel-save auth-submit" type="submit"><span>Enter the house</span><span data-icon="arrow-right"></span></button>
+      </form>
+      <button class="auth-forgot" id="auth-forgot" type="button">Forgot password?</button>
+      <button class="auth-guest" id="auth-guest" type="button" hidden>Continue in local test mode</button>
+    </section>
+
+    <header class="hud" aria-label="Living House status" inert>
+      <button class="icon-button hud-menu" id="directory-toggle" type="button" aria-label="Open house directory" title="House directory">
+        <span data-icon="menu"></span>
+      </button>
+      <div class="hud-brand">
+        <span class="hud-mark" aria-hidden="true"></span>
+        <span>Miracle</span>
+      </div>
+      <div class="hud-progress" aria-label="Morning ritual: zero of three complete">
+        <span class="progress-step" data-progress="anchor"></span>
+        <span class="progress-step" data-progress="aim"></span>
+        <span class="progress-step" data-progress="attend"></span>
+      </div>
+      <div class="hud-actions">
+        <button class="icon-button lantern-button" id="lantern-button" type="button" aria-label="Open Nes lantern" title="Ask Nes">
+          <span data-icon="wand-sparkles"></span>
+        </button>
+        <button class="icon-button" id="signs-button" type="button" aria-label="Open Miracle Signs" title="Miracle Signs">
+          <span data-icon="award"></span>
+        </button>
+        <button class="icon-button" id="sound-toggle" type="button" aria-label="Turn sound on" title="Sound">
+          <span data-icon="volume"></span>
+        </button>
+      </div>
+    </header>
+
+    <section class="gate-intro" id="gate-intro" aria-labelledby="gate-title" inert>
+      <p class="eyebrow">The Living House</p>
+      <h1 id="gate-title">Morning Gate</h1>
+      <p class="gate-verse">"This is the day the Lord has made."</p>
+      <button class="primary-command" id="enter-button" type="button">
+        <span>Enter morning</span>
+        <span data-icon="arrow-right"></span>
+      </button>
+      <p class="sound-note">Water and sound begin after your tap.</p>
+    </section>
+
+    <section class="scene-command" id="scene-command" aria-live="polite" hidden>
+      <div>
+        <p class="command-count" id="command-count">1 of 3</p>
+        <h2 id="command-title">Light the anchor</h2>
+        <p id="command-body">Begin with prayer or scripture.</p>
+      </div>
+      <button class="object-command" id="object-command" type="button">
+        <span id="object-command-label">Open anchor</span>
+        <span data-icon="arrow-right"></span>
+      </button>
+    </section>
+
+    <nav class="room-map" id="room-map" aria-label="The Living House" hidden>
+      <button type="button" data-room="chapel"><span data-icon="flame"></span><span>Chapel</span><i></i></button>
+      <button type="button" data-room="workshop"><span data-icon="hammer"></span><span>Workshop</span><i></i></button>
+      <button type="button" data-room="garden"><span data-icon="flower-2"></span><span>Garden</span><i></i></button>
+      <button type="button" data-room="archive"><span data-icon="book-open"></span><span>Archive</span><i></i></button>
+    </nav>
+
+    <section class="room-interface" id="room-interface" aria-live="polite" hidden>
+      <div class="room-heading">
+        <button class="icon-button" id="atrium-button" type="button" aria-label="Return to the atrium" title="Atrium"><span data-icon="arrow-left"></span></button>
+        <div>
+          <p class="eyebrow" id="room-subtitle">Stand spiritually</p>
+          <h1 id="room-title">Chapel</h1>
+        </div>
+        <button class="growth-button" id="growth-button" type="button" aria-label="View room growth">
+          <span id="growth-level">quiet</span>
+          <i><b id="growth-fill"></b></i>
+        </button>
+      </div>
+      <div class="feature-stage" aria-label="Room objects">
+        <button class="feature-arrow" id="feature-prev" type="button" aria-label="Previous object"><span data-icon="chevron-left"></span></button>
+        <button class="feature-object" id="feature-object" type="button">
+          <span class="feature-aura" aria-hidden="true"></span>
+          <span class="feature-icon" id="feature-icon" aria-hidden="true"></span>
+          <strong id="feature-name">Prayer</strong>
+          <small id="feature-verb">Place a prayer</small>
+        </button>
+        <button class="feature-arrow" id="feature-next" type="button" aria-label="Next object"><span data-icon="chevron-right"></span></button>
+      </div>
+      <div class="feature-dots" id="feature-dots" aria-hidden="true"></div>
+    </section>
+
+    <aside class="directory" id="directory" aria-labelledby="directory-title" hidden>
+      <div class="overlay-head">
+        <div><p class="eyebrow">Every room</p><h2 id="directory-title">House directory</h2></div>
+        <button class="icon-button" type="button" data-close-directory aria-label="Close directory"><span data-icon="x"></span></button>
+      </div>
+      <div class="directory-body" id="directory-body"></div>
+      <div class="directory-foot">
+        <button type="button" aria-label="Replay welcome tour" data-directory-action="onboarding"><span data-icon="map"></span><span>Replay welcome tour</span></button>
+        <button type="button" aria-label="House settings" data-directory-action="settings"><span data-icon="settings"></span><span>House settings</span></button>
+        <button type="button" aria-label="Open Trash" data-directory-action="trash"><span data-icon="trash-2"></span><span>Trash</span></button>
+      </div>
+    </aside>
+
+    <section class="feature-panel" id="feature-panel" role="dialog" aria-modal="true" aria-labelledby="panel-title" hidden>
+      <div class="overlay-head">
+        <button class="icon-button" type="button" data-close-panel aria-label="Return to room"><span data-icon="arrow-left"></span></button>
+        <div><p class="eyebrow" id="panel-room">Chapel</p><h2 id="panel-title">Prayer</h2></div>
+        <button class="icon-button" type="button" data-close-panel aria-label="Close"><span data-icon="x"></span></button>
+      </div>
+      <p class="panel-description" id="panel-description"></p>
+      <div class="panel-tabs" id="panel-tabs" role="tablist">
+        <button type="button" role="tab" data-panel-tab="new" aria-selected="true"><span data-icon="plus"></span><span>New</span></button>
+        <button type="button" role="tab" data-panel-tab="recent" aria-selected="false"><span data-icon="history"></span><span>Recent</span></button>
+      </div>
+      <div class="panel-content" id="panel-content"></div>
+      <div class="panel-actions" id="panel-actions">
+        <button class="panel-save" id="panel-save" type="button"><span>Save this move</span><span data-icon="sparkles"></span></button>
+      </div>
+    </section>
+
+    <section class="rhythm-world special-world" id="rhythm-world" role="dialog" aria-modal="true" aria-labelledby="rhythm-title" hidden>
+      <div class="overlay-head">
+        <button class="icon-button" type="button" data-close-special aria-label="Return to the house"><span data-icon="arrow-left"></span></button>
+        <div><p class="eyebrow">Rule of Life</p><h2 id="rhythm-title">Today's path</h2></div>
+        <button class="icon-button" id="rhythm-edit" type="button" aria-label="Edit daily rule"><span data-icon="settings"></span></button>
+      </div>
+      <div class="rhythm-scroll">
+        <section class="daily-offering" aria-labelledby="offering-title">
+          <div class="rhythm-meter" id="rhythm-meter"><strong id="rhythm-count">0/3</strong><span>resolved</span></div>
+          <div><p class="settings-kicker">Daily offering</p><h3 id="offering-title">A word for today</h3><p id="offering-scripture"></p></div>
+        </section>
+        <section class="wisdom-stone" id="wisdom-stone"><p class="settings-kicker" id="wisdom-kind">Research note</p><h3 id="wisdom-title"></h3><p id="wisdom-copy"></p><a id="wisdom-source" target="_blank" rel="noreferrer">Source</a></section>
+        <section class="daily-assignment" id="daily-assignment"><span data-icon="compass"></span><div><p class="settings-kicker">Today's assignment</p><h3 id="assignment-title"></h3><p id="assignment-copy"></p></div></section>
+        <section aria-labelledby="practice-title"><div class="section-line"><h3 id="practice-title">Chosen practices</h3><span id="practice-status"></span></div><div class="practice-path" id="practice-path"></div></section>
+        <section aria-labelledby="open-loops-title"><div class="section-line"><h3 id="open-loops-title">Open loops</h3><span id="open-loop-count"></span></div><div class="open-loop-path" id="open-loop-path"></div></section>
+        <section aria-labelledby="year-light-title"><div class="section-line"><h3 id="year-light-title">Year of Light</h3><span id="year-light-value"></span></div><div class="year-light" id="year-light" aria-label="Daily completion for this year"></div></section>
+      </div>
+      <div class="rule-editor" id="rule-editor" hidden>
+        <div class="overlay-head"><div><p class="eyebrow">Daily covenant</p><h2>Choose your rule</h2></div><button class="icon-button" id="rule-editor-close" type="button" aria-label="Close rule editor"><span data-icon="x"></span></button></div>
+        <p class="panel-description">Keep it small enough to live. You can close or pause a practice without losing what you earned.</p>
+        <div class="rule-options" id="rule-options"></div>
+        <button class="panel-save" id="rule-save" type="button"><span>Keep this rule</span><span data-icon="check"></span></button>
+      </div>
+    </section>
+
+    <section class="bible-world special-world" id="bible-world" role="dialog" aria-modal="true" aria-labelledby="bible-title" hidden>
+      <div class="overlay-head">
+        <button class="icon-button" type="button" data-close-special aria-label="Return to Chapel"><span data-icon="arrow-left"></span></button>
+        <div><p class="eyebrow">World English Bible</p><h2 id="bible-title">Scripture library</h2></div>
+        <button class="icon-button" id="bible-library-toggle" type="button" aria-label="Open Bible progress"><span data-icon="library"></span></button>
+      </div>
+      <div class="bible-toolbar">
+        <label for="bible-book"><span>Book</span><select id="bible-book"></select></label>
+        <label for="bible-chapter"><span>Chapter</span><select id="bible-chapter"></select></label>
+      </div>
+      <div class="bible-plan" id="bible-plan"></div>
+      <article class="scripture-reader" id="scripture-reader" tabindex="0" aria-live="polite"></article>
+      <div class="bible-controls">
+        <button class="icon-button" id="bible-prev" type="button" aria-label="Previous chapter"><span data-icon="chevron-left"></span></button>
+        <button class="icon-button bible-audio" id="bible-audio" type="button" aria-label="Read chapter aloud"><span data-icon="volume"></span></button>
+        <button class="bible-complete" id="bible-complete" type="button"><span>Mark read</span><span data-icon="check"></span></button>
+        <button class="icon-button" id="bible-next" type="button" aria-label="Next chapter"><span data-icon="chevron-right"></span></button>
+      </div>
+      <aside class="bible-library" id="bible-library" hidden>
+        <div class="overlay-head"><div><p class="eyebrow">Reading progress</p><h2>Illuminated books</h2></div><button class="icon-button" id="bible-library-close" type="button" aria-label="Close Bible progress"><span data-icon="x"></span></button></div>
+        <div class="bible-progress-summary" id="bible-progress-summary"></div>
+        <div class="bible-book-grid" id="bible-book-grid"></div>
+        <div class="bible-goal-builder">
+          <div><p class="eyebrow">Reading goal</p><strong>Build a daily path</strong></div>
+          <label for="bible-goal-book"><span>Book</span><select id="bible-goal-book"></select></label>
+          <label for="bible-goal-days"><span>Finish in</span><select id="bible-goal-days"><option value="7">1 week</option><option value="14">2 weeks</option><option value="28" selected>4 weeks</option><option value="42">6 weeks</option><option value="56">8 weeks</option><option value="84">12 weeks</option></select></label>
+          <button class="panel-save" id="bible-goal-start" type="button"><span>Begin goal</span><span data-icon="route"></span></button>
+          <button class="text-command" id="tobit-plan-start" type="button">Use Tobit · four weeks</button>
+        </div>
+      </aside>
+    </section>
+
+    <section class="focus-world special-world" id="focus-world" role="dialog" aria-modal="true" aria-labelledby="focus-title" hidden>
+      <div class="overlay-head">
+        <button class="icon-button" type="button" data-close-special aria-label="Return to Workshop"><span data-icon="arrow-left"></span></button>
+        <div><p class="eyebrow">Workshop</p><h2 id="focus-title">Focus chamber</h2></div>
+        <button class="icon-button" type="button" id="focus-sound" aria-label="Toggle focus sound"><span data-icon="waves"></span></button>
+      </div>
+      <div class="focus-chamber">
+        <div class="focus-ring" id="focus-ring"><span id="focus-time">25:00</span><small id="focus-state">ready</small></div>
+        <label class="field-label" for="focus-label">What are you moving?</label>
+        <input id="focus-label" type="text" maxlength="140" placeholder="One clear piece of work" autocomplete="off">
+        <div class="focus-presets" role="group" aria-label="Session length">
+          <button type="button" data-focus-minutes="10">10</button>
+          <button type="button" data-focus-minutes="25" class="is-active">25</button>
+          <button type="button" data-focus-minutes="45">45</button>
+        </div>
+        <div class="focus-controls">
+          <button class="icon-button" id="focus-reset" type="button" aria-label="Reset session"><span data-icon="rotate-ccw"></span></button>
+          <button class="focus-primary" id="focus-primary" type="button" aria-label="Start focus"><span data-icon="play"></span></button>
+          <button class="icon-button" id="focus-finish" type="button" aria-label="Finish and record"><span data-icon="check"></span></button>
+        </div>
+        <p class="field-error" id="focus-error" role="alert"></p>
+      </div>
+    </section>
+
+    <section class="book-world special-world" id="book-world" role="dialog" aria-modal="true" aria-labelledby="book-title" hidden>
+      <div class="overlay-head">
+        <button class="icon-button" type="button" data-close-special aria-label="Return to Archive"><span data-icon="arrow-left"></span></button>
+        <div><p class="eyebrow">Archive</p><h2 id="book-title">Living book</h2></div>
+        <button class="icon-button" id="book-edit-toggle" type="button" aria-label="Decorate this spread"><span data-icon="highlighter"></span></button>
+      </div>
+      <div class="book-date-nav">
+        <button class="icon-button" id="book-prev" type="button" aria-label="Previous day"><span data-icon="chevron-left"></span></button>
+        <time id="book-date"></time>
+        <button class="icon-button" id="book-next" type="button" aria-label="Next day"><span data-icon="chevron-right"></span></button>
+      </div>
+      <div class="open-book" id="open-book">
+        <div class="book-leaf book-leaf-left" id="book-left"></div>
+        <div class="book-binding" aria-hidden="true"><i></i></div>
+        <div class="book-leaf book-leaf-right" id="book-right"></div>
+      </div>
+      <div class="book-tools" id="book-tools" hidden>
+        <label><span>Highlight</span><input id="book-highlight" type="text" maxlength="120" placeholder="A line to keep"></label>
+        <label><span>Note</span><input id="book-note" type="text" maxlength="120" placeholder="Write in the margin"></label>
+        <div class="sticker-palette" role="radiogroup" aria-label="Page mark">
+          <button type="button" data-sticker="star" aria-label="Gold star"><span data-icon="star"></span></button>
+          <button type="button" data-sticker="heart" aria-label="Heart"><span data-icon="heart"></span></button>
+          <button type="button" data-sticker="flame" aria-label="Flame"><span data-icon="flame"></span></button>
+          <button type="button" data-sticker="sprout" aria-label="Sprout"><span data-icon="sprout"></span></button>
+        </div>
+        <button class="panel-save" id="book-mark-save" type="button"><span>Place on page</span><span data-icon="sparkles"></span></button>
+      </div>
+    </section>
+
+    <section class="search-world special-world" id="search-world" role="dialog" aria-modal="true" aria-labelledby="search-title" hidden>
+      <div class="overlay-head">
+        <button class="icon-button" type="button" data-close-special aria-label="Return to Archive"><span data-icon="arrow-left"></span></button>
+        <div><p class="eyebrow">Archive</p><h2 id="search-title">Search the house</h2></div>
+        <span></span>
+      </div>
+      <label class="search-field" for="house-search"><span data-icon="search"></span><input id="house-search" type="search" aria-label="Search the house" placeholder="A word, person, prayer, idea..." autocomplete="off"></label>
+      <div class="search-results" id="search-results"><p class="quiet-empty">Type two letters to begin.</p></div>
+    </section>
+
+    <section class="trash-world special-world" id="trash-world" role="dialog" aria-modal="true" aria-labelledby="trash-title" hidden>
+      <div class="overlay-head">
+        <button class="icon-button" type="button" data-close-special aria-label="Return to Archive"><span data-icon="arrow-left"></span></button>
+        <div><p class="eyebrow">30 day holding place</p><h2 id="trash-title">Trash</h2></div>
+        <span></span>
+      </div>
+      <p class="panel-description">Deleted records stay here for 30 days before permanent removal.</p>
+      <div class="trash-list" id="trash-list"></div>
+    </section>
+
+    <section class="signs-world special-world" id="signs-world" role="dialog" aria-modal="true" aria-labelledby="signs-title" hidden>
+      <div class="overlay-head">
+        <button class="icon-button" type="button" data-close-special aria-label="Return to house"><span data-icon="arrow-left"></span></button>
+        <div><p class="eyebrow">What your life has made visible</p><h2 id="signs-title">Miracle Signs</h2></div>
+        <span></span>
+      </div>
+      <div class="signs-summary" id="signs-summary"></div>
+      <div class="signs-earned" id="signs-earned"></div>
+      <div class="signs-path" id="signs-path"></div>
+    </section>
+
+    <section class="achievement-reveal" id="achievement-reveal" role="dialog" aria-modal="true" aria-labelledby="achievement-title" hidden>
+      <div class="achievement-fireflies" aria-hidden="true"></div>
+      <p class="eyebrow">A new Miracle Sign</p>
+      <div class="achievement-mark" aria-hidden="true"><span data-icon="award"></span></div>
+      <h2 id="achievement-title">Watchfire</h2>
+      <p id="achievement-copy">Faithful actions kept a room alive.</p>
+      <button class="primary-command" id="achievement-close" type="button"><span>Keep building</span><span data-icon="arrow-right"></span></button>
+    </section>
+
+    <section class="nes-world special-world" id="nes-world" role="dialog" aria-modal="true" aria-labelledby="nes-title" hidden>
+      <div class="overlay-head">
+        <button class="icon-button" type="button" data-close-special aria-label="Return to house"><span data-icon="arrow-left"></span></button>
+        <div><p class="eyebrow">Guidance tool</p><h2 id="nes-title">Nes lantern</h2></div>
+        <button class="icon-button" id="nes-clear" type="button" aria-label="Clear conversation"><span data-icon="eraser"></span></button>
+      </div>
+      <div class="nes-messages" id="nes-messages"></div>
+      <form class="nes-compose" id="nes-form">
+        <label for="nes-input">Ask Nes</label>
+        <textarea id="nes-input" rows="2" maxlength="1600" placeholder="What do you need help thinking through?"></textarea>
+        <button type="submit" aria-label="Send to Nes"><span data-icon="arrow-up"></span></button>
+      </form>
+      <p class="nes-note">Nes is an AI tool, not the Holy Spirit.</p>
+    </section>
+
+    <section class="settings-world special-world" id="settings-world" role="dialog" aria-modal="true" aria-labelledby="settings-title" hidden>
+      <div class="overlay-head">
+        <button class="icon-button" type="button" data-close-special aria-label="Return to house"><span data-icon="arrow-left"></span></button>
+        <div><p class="eyebrow">Make the house yours</p><h2 id="settings-title">House settings</h2></div>
+        <span></span>
+      </div>
+      <div class="settings-scroll">
+        <section class="settings-section" aria-labelledby="setting-atmosphere-title">
+          <p class="settings-kicker" id="setting-atmosphere-title">Atmosphere</p>
+          <button class="setting-row" type="button" role="switch" aria-checked="true" data-setting-toggle="ambientSound">
+            <span class="setting-icon" data-icon="waves"></span>
+            <span><strong>Living sound</strong><small>Water, doors, work tones, and rewards</small></span>
+            <i aria-hidden="true"><b></b></i>
+          </button>
+          <button class="setting-row" type="button" role="switch" aria-checked="false" data-setting-toggle="quietMotion">
+            <span class="setting-icon" data-icon="wind"></span>
+            <span><strong>Quiet motion</strong><small>Keep transitions calm and remove ambient drift</small></span>
+            <i aria-hidden="true"><b></b></i>
+          </button>
+          <button class="setting-row" type="button" role="switch" aria-checked="true" data-setting-toggle="mojiCameos">
+            <span class="setting-icon" data-icon="user"></span>
+            <span><strong>Moji cameos</strong><small>Let Moji visit with small actions and words</small></span>
+            <i aria-hidden="true"><b></b></i>
+          </button>
+        </section>
+        <section class="settings-section" aria-labelledby="setting-reminders-title">
+          <p class="settings-kicker" id="setting-reminders-title">Daily reminders</p>
+          <div class="reminder-times">
+            <label for="reminder-morning"><span>Morning invitation</span><input id="reminder-morning" type="time" value="07:30"></label>
+            <label for="reminder-follow"><span>Follow-through</span><input id="reminder-follow" type="time" value="19:00"></label>
+          </div>
+          <button class="settings-command" id="reminder-toggle" type="button"><span data-icon="bell"></span><span>Enable installed-app reminders</span></button>
+          <button class="settings-command" id="reminder-save" type="button"><span data-icon="check"></span><span>Save reminder times</span></button>
+          <p class="settings-status" id="reminder-status" role="status" aria-live="polite"></p>
+        </section>
+        <section class="settings-section" aria-labelledby="setting-account-title">
+          <p class="settings-kicker" id="setting-account-title">Account</p>
+          <div class="account-plaque">
+            <span class="account-initials" id="settings-initials">M</span>
+            <span><strong id="settings-account-name">Miracle keeper</strong><small id="settings-account-email">Local house</small></span>
+          </div>
+          <p class="settings-status" id="settings-status" role="status" aria-live="polite"></p>
+          <button class="settings-command" id="settings-verify" type="button"><span data-icon="mail-check"></span><span>Resend verification email</span></button>
+          <button class="settings-command" id="settings-logout" type="button"><span data-icon="log-out"></span><span>Log out of this house</span></button>
+        </section>
+        <p class="build-stamp" id="game-build-stamp">Living House build</p>
+      </div>
+    </section>
+
+    <section class="welcome-tour" id="welcome-tour" role="dialog" aria-modal="true" aria-labelledby="tour-title" hidden>
+      <div class="tour-visual" id="tour-visual" aria-hidden="true"><span data-icon="door-open"></span></div>
+      <p class="eyebrow" id="tour-step">1 of 5</p>
+      <h2 id="tour-title">Your life moves the house</h2>
+      <p id="tour-copy">Prayer, work, care, and memory are the moves. The world changes only after something real is saved.</p>
+      <div class="tour-actions">
+        <button type="button" id="tour-skip">Skip</button>
+        <button class="primary-command" type="button" id="tour-next"><span>Continue</span><span data-icon="arrow-right"></span></button>
+      </div>
+    </section>
+
+    <aside class="moji-cameo" id="moji-cameo" aria-live="polite" hidden>
+      <div class="moji-character" id="moji-character" aria-hidden="true"></div>
+      <blockquote id="moji-message"></blockquote>
+      <button type="button" aria-label="Dismiss Moji" data-dismiss-moji><span data-icon="x"></span></button>
+    </aside>
+
+    <aside class="game-update" id="game-update" role="status" aria-live="polite" hidden>
+      <span data-icon="refresh-cw"></span>
+      <p><strong>New version ready</strong><small>Your records are safe.</small></p>
+      <button type="button" id="game-update-reload">Reload</button>
+      <button type="button" id="game-update-later" aria-label="Remind me later"><span data-icon="x"></span></button>
+    </aside>
+
+    <div class="sheet-backdrop" id="sheet-backdrop" hidden></div>
+
+    <section class="action-sheet" id="anchor-sheet" role="dialog" aria-modal="true" aria-labelledby="anchor-title" hidden>
+      <div class="sheet-handle" aria-hidden="true"></div>
+      <button class="sheet-close" type="button" data-close-sheet aria-label="Close"><span data-icon="x"></span></button>
+      <p class="sheet-step">Anchor</p>
+      <h2 id="anchor-title">What are you placing before God?</h2>
+      <p class="sheet-reflection">A sentence is enough.</p>
+      <label class="field-label" for="anchor-input">Prayer</label>
+      <textarea id="anchor-input" rows="3" maxlength="240" placeholder="Write it here..."></textarea>
+      <p class="field-error" id="anchor-error" role="alert"></p>
+      <button class="sheet-submit" type="button" data-submit="anchor"><span>Place the prayer</span><span data-icon="flame"></span></button>
+    </section>
+
+    <section class="action-sheet" id="aim-sheet" role="dialog" aria-modal="true" aria-labelledby="aim-title" hidden>
+      <div class="sheet-handle" aria-hidden="true"></div>
+      <button class="sheet-close" type="button" data-close-sheet aria-label="Close"><span data-icon="x"></span></button>
+      <p class="sheet-step">Aim</p>
+      <h2 id="aim-title">What must move today?</h2>
+      <p class="sheet-reflection">Choose one honest priority.</p>
+      <label class="field-label" for="aim-input">Today's one thing</label>
+      <input id="aim-input" type="text" maxlength="120" placeholder="Name the work..." autocomplete="off">
+      <p class="field-error" id="aim-error" role="alert"></p>
+      <button class="sheet-submit" type="button" data-submit="aim"><span>Set the course</span><span data-icon="target"></span></button>
+    </section>
+
+    <section class="action-sheet mood-sheet" id="attend-sheet" role="dialog" aria-modal="true" aria-labelledby="attend-title" hidden>
+      <div class="sheet-handle" aria-hidden="true"></div>
+      <button class="sheet-close" type="button" data-close-sheet aria-label="Close"><span data-icon="x"></span></button>
+      <p class="sheet-step">Attend</p>
+      <h2 id="attend-title">How is your inner weather?</h2>
+      <p class="sheet-reflection">There is no score until you answer.</p>
+      <div class="mood-orbit" id="mood-orbit" data-value="none">
+        <div class="mood-orbit-ring" aria-hidden="true"></div>
+        <div class="mood-value" id="mood-value">--</div>
+        <div class="mood-word" id="mood-word">unlogged</div>
+      </div>
+      <div class="mood-options" role="radiogroup" aria-label="Choose your current mood">
+        <button type="button" role="radio" aria-checked="false" data-mood="heavy" data-score="20">heavy</button>
+        <button type="button" role="radio" aria-checked="false" data-mood="stretched" data-score="40">stretched</button>
+        <button type="button" role="radio" aria-checked="false" data-mood="steady" data-score="60">steady</button>
+        <button type="button" role="radio" aria-checked="false" data-mood="light" data-score="80">light</button>
+        <button type="button" role="radio" aria-checked="false" data-mood="joyful" data-score="100">joyful</button>
+      </div>
+      <p class="field-error" id="attend-error" role="alert"></p>
+      <button class="sheet-submit" type="button" data-submit="attend"><span>Tell the truth</span><span data-icon="heart"></span></button>
+    </section>
+
+    <section class="reward-reveal" id="reward-reveal" role="dialog" aria-modal="true" aria-labelledby="reward-title" hidden>
+      <div class="reward-sparks" aria-hidden="true"></div>
+      <p class="eyebrow">Miracle Sign received</p>
+      <div class="sign-mark" aria-hidden="true">
+        <span></span>
+      </div>
+      <h2 id="reward-title">First Light</h2>
+      <p class="reward-copy">You anchored, aimed, and attended. The house is awake.</p>
+      <button class="primary-command" id="continue-button" type="button">
+        <span>Enter the house</span>
+        <span data-icon="arrow-right"></span>
+      </button>
+    </section>
+
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+  </main>
+
+  <script type="module" src="./game.js?v=__BUILD__"></script>
+</body>
+</html>

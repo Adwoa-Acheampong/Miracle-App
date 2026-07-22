@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0F1614"/>
+      <stop offset="100%" stop-color="#050608"/>
+    </linearGradient>
+    <linearGradient id="m" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#34D399"/>
+      <stop offset="50%" stop-color="#10B981"/>
+      <stop offset="100%" stop-color="#047857"/>
+    </linearGradient>
+    <radialGradient id="halo" cx="0.5" cy="0.32" r="0.4">
+      <stop offset="0%" stop-color="rgba(52,211,153,0.30)"/>
+      <stop offset="100%" stop-color="rgba(52,211,153,0)"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="512" height="512" fill="url(#bg)"/>
+  <rect width="512" height="512" fill="url(#halo)"/>
+
+  <!-- Proper M monogram inside the 80% safe zone (102→410) -->
+  <polyline points="156,368 156,192 256,312 356,192 356,368"
+            stroke="url(#m)" stroke-width="26"
+            stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+  <!-- Sparkle above center valley -->
+  <g transform="translate(256 152)" fill="#34D399">
+    <path d="M0 -32 L8 -8 L32 0 L8 8 L0 32 L-8 8 L-32 0 L-8 -8 Z"/>
+  </g>
+  <circle cx="256" cy="152" r="6" fill="#FFFFFF" opacity="0.75"/>
+</svg>

@@ -1,0 +1,441 @@
+/* editorial.css — Editorial section + chart patterns
+   Inspired by Fund24 application layout, themed in Miracle emerald palette. */
+
+/* ════════════ SECTION HEADER ════════════ */
+
+.ed-section {
+  margin-bottom: var(--sp-7);
+  position: relative;
+  z-index: 1;
+}
+.ed-head {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: end;
+  gap: var(--sp-4);
+  margin-bottom: var(--sp-3);
+  padding-bottom: var(--sp-2);
+  border-bottom: 1px solid var(--emerald-glow);
+}
+.ed-head-left {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.ed-section-code {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+.ed-section-code .ed-code-num { color: var(--emerald); }
+.ed-section-sub {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.ed-title {
+  font-family: 'Cormorant Garamond', 'EB Garamond', Georgia, serif;
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  font-weight: 400;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  color: var(--ink-0);
+  margin-top: 4px;
+}
+.ed-title em {
+  font-style: italic;
+  color: var(--emerald);
+  font-weight: 400;
+}
+.ed-head-right {
+  text-align: right;
+}
+.ed-badge-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.ed-badge-val {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: var(--fs-lg);
+  font-style: italic;
+  color: var(--emerald);
+  letter-spacing: -0.01em;
+  margin-top: 2px;
+}
+
+/* ════════════ EDITORIAL CARD ════════════ */
+
+.ed-card {
+  background: var(--bg-1);
+  border: 1px solid var(--emerald-glow);
+  border-radius: var(--r-3);
+  padding: var(--sp-4) var(--sp-5);
+  position: relative;
+}
+.ed-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  margin-bottom: var(--sp-3);
+  padding-bottom: var(--sp-1);
+  border-bottom: 1px solid var(--line);
+}
+.ed-card-head .num,
+.ed-card-head em {
+  color: var(--emerald);
+  font-family: var(--font-mono);
+  font-style: normal;
+}
+
+/* ════════════ GANTT TIMELINE ════════════ */
+
+.gantt {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 0;
+}
+.gantt-headcol, .gantt-bars {
+  display: grid;
+  grid-auto-rows: 36px;
+  border-top: 1px solid var(--line);
+}
+.gantt-headcol {
+  border-right: 1px solid var(--emerald-glow);
+}
+.gantt-row-label {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: 0 var(--sp-3) 0 0;
+  border-bottom: 1px solid var(--line);
+  font-size: var(--fs-sm);
+  color: var(--ink-1);
+  position: relative;
+}
+.gantt-row-label .ed-row-code {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--ink-3);
+  letter-spacing: 0.06em;
+  margin-left: auto;
+}
+.gantt-track {
+  position: relative;
+  border-bottom: 1px solid var(--line);
+  background:
+    repeating-linear-gradient(
+      to right,
+      transparent 0,
+      transparent calc(100% / 12 - 1px),
+      var(--line) calc(100% / 12 - 1px),
+      var(--line) calc(100% / 12)
+    );
+}
+.gantt-bar {
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  background: linear-gradient(180deg, var(--emerald), var(--emerald-deep));
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  padding: 0 6px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(0,0,0,0.85);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  animation: ganttGrow 600ms cubic-bezier(0.4, 0, 0.2, 1) both;
+  transform-origin: left center;
+}
+.gantt-bar.is-done { background: linear-gradient(180deg, var(--emerald-deep), #034e3a); opacity: 0.65; }
+.gantt-bar.is-blocked { background: linear-gradient(180deg, var(--ruby), var(--ruby-deep)); color: #fff; }
+.gantt-bar.is-future { background: rgba(16, 185, 129, 0.25); color: var(--emerald-bright, var(--emerald)); border: 1px dashed var(--emerald); }
+@keyframes ganttGrow { from { transform: scaleX(0); opacity: 0; } }
+
+.gantt-months {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  margin-bottom: 6px;
+}
+.gantt-month-labels {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--ink-2);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding-left: 0;
+}
+.gantt-month-labels span {
+  text-align: left;
+  padding-left: 4px;
+  border-left: 1px solid var(--line);
+}
+.gantt-month-labels span:first-child { border-left: 0; }
+
+.gantt-today-line {
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 1px;
+  background: var(--emerald);
+  z-index: 2;
+  pointer-events: none;
+}
+.gantt-today-line::before {
+  content: 'now';
+  position: absolute;
+  top: -16px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-mono);
+  font-size: 8px;
+  color: var(--emerald);
+  letter-spacing: 0.1em;
+}
+
+/* ════════════ Y-MATRIX TABLE (Y1/Y2/Y3 columns) ════════════ */
+
+.ymatrix {
+  border-top: 1px solid var(--line);
+}
+.ymatrix-row {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr 1fr 1.4fr;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: 10px var(--sp-3);
+  border-bottom: 1px solid var(--line);
+  font-size: var(--fs-sm);
+}
+.ymatrix-row.is-header {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  padding: 6px var(--sp-3);
+}
+.ymatrix-row.is-total {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-style: italic;
+  font-size: var(--fs-md);
+  color: var(--emerald);
+  border-top: 1px solid var(--emerald-glow);
+  border-bottom: 0;
+  padding-top: 12px;
+}
+.ymatrix-num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  color: var(--ink-0);
+}
+.ymatrix-priority {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--ink-2);
+  letter-spacing: 0.04em;
+}
+.ymatrix-priority .ed-source { color: var(--emerald); }
+
+/* ════════════ STACKED BAR (revenue growth style) ════════════ */
+
+.stacked-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: var(--sp-3) 0;
+}
+.stacked-bar-row {
+  display: grid;
+  grid-template-columns: 36px 1fr 80px;
+  align-items: center;
+  gap: var(--sp-3);
+}
+.stacked-bar-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-2);
+  letter-spacing: 0.08em;
+}
+.stacked-bar-track {
+  height: 14px;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  overflow: hidden;
+  display: flex;
+}
+.stacked-bar-fill {
+  height: 100%;
+  background: linear-gradient(180deg, var(--emerald-bright, var(--emerald)), var(--emerald-deep));
+  animation: barGrow 700ms cubic-bezier(0.4, 0, 0.2, 1) both;
+  transform-origin: left center;
+}
+.stacked-bar-fill.is-target {
+  background: rgba(16, 185, 129, 0.18);
+  border-right: 1px solid var(--emerald);
+}
+@keyframes barGrow { from { transform: scaleX(0); } }
+.stacked-bar-num {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-style: italic;
+  font-size: var(--fs-md);
+  color: var(--emerald);
+  text-align: right;
+}
+
+/* ════════════ CUMULATIVE CASH BAR ════════════ */
+
+.cash-rows {
+  padding: var(--sp-3) 0;
+}
+.cash-row-ed {
+  display: grid;
+  grid-template-columns: 50px 1fr 100px;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: 6px 0;
+}
+.cash-row-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-2);
+  letter-spacing: 0.08em;
+}
+.cash-row-bar {
+  height: 14px;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative;
+}
+.cash-row-fill {
+  height: 100%;
+  background: linear-gradient(180deg, var(--emerald-bright, var(--emerald)), var(--emerald-deep));
+  animation: barGrow 600ms cubic-bezier(0.4, 0, 0.2, 1) both;
+  transform-origin: left center;
+}
+.cash-row-fill.is-neg {
+  background: linear-gradient(180deg, var(--ruby), var(--ruby-deep));
+}
+.cash-row-value {
+  font-family: var(--font-mono);
+  font-size: var(--fs-sm);
+  text-align: right;
+  color: var(--ink-0);
+}
+.cash-row-value .ed-breakeven {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-style: italic;
+  font-size: 10px;
+  color: var(--emerald);
+  margin-left: 6px;
+}
+.cash-row-ed.is-breakeven .cash-row-fill {
+  background: linear-gradient(180deg, var(--emerald-bright, #34D399), var(--emerald));
+  box-shadow: 0 0 8px var(--emerald-glow);
+}
+
+/* ════════════ KEY INDICATOR ROW (DSCR style) ════════════ */
+
+.key-indicator {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr 1fr;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: 10px var(--sp-3);
+  margin-top: var(--sp-3);
+  border: 1px solid var(--emerald-glow);
+  border-radius: var(--r-2);
+  background: var(--bg-2);
+}
+.key-indicator.is-header {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  background: transparent;
+  border: 0;
+  padding-bottom: 0;
+}
+.key-indicator-label { color: var(--ink-1); font-size: var(--fs-sm); }
+.key-indicator-val {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-style: italic;
+  text-align: right;
+  color: var(--emerald);
+  font-size: var(--fs-md);
+}
+
+/* ════════════ JOB / SOURCE MATRIX (used for venture or domain matrices) ════════════ */
+
+.source-matrix {
+  border-top: 1px solid var(--line);
+}
+.source-matrix-row {
+  display: grid;
+  grid-template-columns: 1.6fr 0.6fr 0.6fr 0.6fr 1.6fr;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: 10px var(--sp-3);
+  border-bottom: 1px solid var(--line);
+  font-size: var(--fs-sm);
+}
+.source-matrix-row.is-header {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  padding: 6px var(--sp-3);
+}
+.source-matrix-row .ymatrix-num { text-align: center; }
+.source-matrix-row.is-total {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-style: italic;
+  font-size: var(--fs-md);
+  color: var(--emerald);
+  border-top: 1px solid var(--emerald-glow);
+  border-bottom: 0;
+  padding-top: 12px;
+}
+
+/* ════════════ MOBILE ════════════ */
+
+@media (max-width: 640px) {
+  .gantt, .gantt-months {
+    grid-template-columns: 100px 1fr;
+  }
+  .ymatrix-row,
+  .source-matrix-row {
+    grid-template-columns: 1.4fr 0.7fr 0.7fr 0.7fr;
+    font-size: 10px;
+  }
+  .ymatrix-priority,
+  .source-matrix-row > :last-child { display: none; }
+  .ed-title { font-size: 1.4rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gantt-bar, .stacked-bar-fill, .cash-row-fill { animation: none !important; }
+}

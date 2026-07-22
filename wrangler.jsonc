@@ -1,0 +1,21 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "miracle-app",
+  "pages_build_output_dir": "./dist",
+  "compatibility_date": "2026-06-23",
+  "vars": {
+    "APP_URL": "https://miracle-app.pages.dev",
+    "BUILD_TOKEN": "cloudflare-local",
+    "EMAIL_FROM": "miracle <noreply@miracleapp.site>",
+    "VAPID_PUBLIC_KEY": "BCPCktcyjYftu7XCTjUVdHsI1TxrJQSQDgUHudAyaLtsKapk9T82QdfZDMoiscOzeggh5Pgn1BsOUfQ3CdfDXnw",
+    "CLOUDFLARE_ACCOUNT_ID": "a8eab5d3dd5b1612de85cce6e49ec386"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "miracle-db",
+      "database_id": "329f8c5b-9327-417d-82c0-dc9a45871c77",
+      "migrations_dir": "migrations"
+    }
+  ]
+}

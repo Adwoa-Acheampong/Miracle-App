@@ -1,51 +1,58 @@
 # Miracle: The Living House
 
-An immersive, full-screen life game where reflection, breath, gratitude, and real-world action make a living world respond.
+Miracle is an immersive, room-based life game for faith, work, care, and memory. The original Hobonichi game is the source of truth: the 3D Morning Gate, physical doors, Atrium, Chapel, Workshop, Garden, Archive, progression systems, local data, account sync, notifications, and installable PWA all remain intact.
 
-This build combines the original repository's fast React interaction model, frosted-glass interface, DM Sans typography, and procedural sound design with the Hobonichi prototype's obsidian-black atmosphere, emerald light, restrained gold accents, and Living House identity.
-
-## Experience
-
-- Responsive canvas world with four interactive landmarks
-- Frosted-glass HUD and contextual sheets
-- Synthesized water ambience, hover tones, confirmations, and reward sounds
-- Local progress for sparks, discoveries, and history
-- Reduced-motion support and keyboard-accessible alternatives
-- Gemini-backed reflection endpoints with server-side key handling
+The interface combines that complete game with an integrated frosted-glass design system: obsidian and emerald light, Cormorant Garamond display type, DM Sans controls, JetBrains Mono data, synthesized ambience, hover tones, room travel sounds, and reward audio.
 
 ## Run locally
 
-Requirements: Node.js 20 or newer.
+Node 20 or newer is required.
 
-```bash
+```powershell
 npm install
-```
-
-Copy `.env.example` to `.env.local` and set `GEMINI_API_KEY`, then run:
-
-```bash
+$env:PORT=3000
 npm run dev
 ```
 
-Open the local URL printed by the server.
+Open `http://127.0.0.1:3000/`. The root route opens the Living House at `/game-preview/`. On localhost, the auth screen offers local test mode so the complete game can be previewed without a database account.
+
+For the static Cloudflare Pages build:
+
+```powershell
+npm run build:cloudflare
+npx wrangler pages dev dist --port 3000
+```
+
+## What is included
+
+- Three.js Morning Gate, Atrium, animated doors, and four dedicated room builders
+- Chapel: prayer, Scripture, fasting, testimony, and Bible reading plans
+- Workshop: tasks, projects, plans, ideas, focus sessions, and scheduling
+- Garden: health, meals, people, dreams, and care practices
+- Archive: journal, living book, finance, search, memory, and reflection
+- Full public-domain WEB-C Bible corpus: 73 books, including Tobit and the deuterocanon
+- IndexedDB offline storage, account auth, sync APIs, email flows, and MySQL/D1 schemas
+- PWA install, offline cache, background sync, update prompts, push notifications, and reminders worker
+- Frosted-glass UI, black/emerald gradient, responsive layouts, reduced-motion support, hover audio, ambient water, door, travel, confirm, error, focus, and reward sounds
+
+## Project layout
+
+```text
+public/game-preview/   Living House UI, Three.js world, systems, PWA, and Bible corpus
+public/                Shared storage, auth, icons, attachments, user, and life-domain modules
+server/                Express, MySQL, auth, sync, email, and Nes backend
+functions/             Cloudflare Pages Functions equivalents
+migrations/            D1 schema migrations
+workers/reminders/     Push reminder worker
+scripts/               Cloudflare build and data-generation scripts
+test/                  Game, PWA, database, and utility tests
+```
 
 ## Verify
 
-```bash
-npm run check
+```powershell
+npm test
+npm run build:cloudflare
 ```
 
-This runs the TypeScript check and production build.
-
-## Visual system
-
-- Obsidian: `#050806`
-- Black jade: `#0B1711`
-- Emerald: `#10B981`
-- Bright emerald: `#34D399`
-- Miracle gold: `#D7B56D`
-- Interface: DM Sans
-- Reflective copy: Cormorant Garamond italic
-- Numeric detail: JetBrains Mono
-
-Sound remains muted until the player chooses **Wake the House**.
+Generated screenshots, browser traces, temporary archives, and build output are intentionally excluded from version control. The game data and complete Bible corpus are versioned because they are runtime content, not test artifacts.

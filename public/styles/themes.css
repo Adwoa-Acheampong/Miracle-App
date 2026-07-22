@@ -1,0 +1,218 @@
+/* themes.css · 4 themes × 3 modes
+   Apply via attributes on <html>: data-theme + data-mode. */
+
+/* ════════════════════ THEMES ════════════════════ */
+
+:root[data-theme="eden-night"],
+:root[data-theme="claude-dark"] {
+  --bg-0:        #050608;
+  --bg-1:        #0C0E11;
+  --bg-2:        #14171C;
+  --bg-3:        #1B1F26;
+  --line:        rgba(255, 255, 255, 0.06);
+  --line-strong: rgba(16, 185, 129, 0.20);
+  --ink-0:       #ECF4EE;
+  --ink-1:       #A5B5AB;
+  --ink-2:       #6B7C73;
+  --ink-3:       #44504A;
+  --emerald:        #10B981;
+  --emerald-deep:   #047857;
+  --emerald-bright: #34D399;
+  --emerald-glow:   rgba(16, 185, 129, 0.18);
+  --emerald-mist:   rgba(16, 185, 129, 0.06);
+  --ruby:           #E11D48;
+  --ruby-deep:      #BE123C;
+  --ruby-glow:      rgba(225, 29, 72, 0.16);
+  --paper:          #F5EFD8;
+  --paper-ink:      #2A2620;
+  --paper-rule:     rgba(42, 38, 32, 0.18);
+  --paper-margin:   #E7DEC2;
+  --glass-bg:       rgba(5, 6, 8, 0.78);
+  --glass-blur:     blur(20px) saturate(160%);
+
+  --grad-hero:       linear-gradient(135deg, #10B981 0%, #047857 35%, #0A1410 100%);
+  --grad-surface:    radial-gradient(at 0% 0%,   rgba(16, 185, 129, 0.10) 0%, transparent 50%),
+                     radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.04) 0%, transparent 60%),
+                     var(--bg-0);
+  --grad-card:       linear-gradient(160deg, var(--bg-1) 0%, var(--bg-0) 100%);
+  --grad-emerald:    linear-gradient(135deg, #34D399 0%, #10B981 50%, #047857 100%);
+  --grad-emerald-glow: radial-gradient(at 30% 0%, rgba(52, 211, 153, 0.35) 0%, transparent 60%);
+  --grad-topbar:     linear-gradient(90deg, rgba(16, 185, 129, 0.06), transparent 40%);
+}
+
+:root[data-theme="manna-paper"],
+:root[data-theme="claude-light"] {
+  --bg-0:        #F6F1E5;
+  --bg-1:        #EFE8D6;
+  --bg-2:        #E5DCC4;
+  --bg-3:        #D9CFB3;
+  --line:        rgba(42, 38, 32, 0.10);
+  --line-strong: rgba(42, 38, 32, 0.18);
+  --ink-0:       #2A2620;
+  --ink-1:       #5A5249;
+  --ink-2:       #847A6D;
+  --ink-3:       #B5AC9C;
+  --emerald:        #047857;
+  --emerald-deep:   #065F46;
+  --emerald-bright: #10B981;
+  --emerald-glow:   rgba(4, 120, 87, 0.14);
+  --emerald-mist:   rgba(4, 120, 87, 0.05);
+  --ruby:           #BE123C;
+  --ruby-deep:      #9F1239;
+  --ruby-glow:      rgba(190, 18, 60, 0.12);
+  --paper:          #F5EFD8;
+  --paper-ink:      #2A2620;
+  --paper-rule:     rgba(42, 38, 32, 0.16);
+  --paper-margin:   #E7DEC2;
+  --glass-bg:       rgba(246, 241, 229, 0.80);
+  --glass-blur:     blur(20px) saturate(120%);
+
+  --grad-hero:      linear-gradient(135deg, #10B981 0%, #047857 35%, #2A2620 100%);
+  --grad-surface:   radial-gradient(at 0% 0%, rgba(4, 120, 87, 0.08) 0%, transparent 55%),
+                    radial-gradient(at 100% 100%, rgba(190, 18, 60, 0.05) 0%, transparent 60%),
+                    var(--bg-0);
+  --grad-card:      linear-gradient(160deg, var(--bg-1) 0%, var(--bg-0) 100%);
+  --grad-emerald:   linear-gradient(135deg, #10B981 0%, #047857 50%, #065F46 100%);
+  --grad-emerald-glow: radial-gradient(at 30% 0%, rgba(16, 185, 129, 0.22) 0%, transparent 60%);
+  --grad-topbar:    linear-gradient(90deg, rgba(4, 120, 87, 0.05), transparent 40%);
+}
+
+:root[data-theme="zion-watch"],
+:root[data-theme="github-dark"] {
+  --bg-0:        #0D1117;
+  --bg-1:        #161B22;
+  --bg-2:        #1F252E;
+  --bg-3:        #283038;
+  --line:        rgba(240, 246, 252, 0.06);
+  --line-strong: rgba(240, 246, 252, 0.12);
+  --ink-0:       #C9D1D9;
+  --ink-1:       #8B949E;
+  --ink-2:       #6E7681;
+  --ink-3:       #484F58;
+  --emerald:        #3FB950;
+  --emerald-deep:   #238636;
+  --emerald-bright: #56D364;
+  --emerald-glow:   rgba(63, 185, 80, 0.14);
+  --emerald-mist:   rgba(63, 185, 80, 0.05);
+  --ruby:           #F85149;
+  --ruby-deep:      #DA3633;
+  --ruby-glow:      rgba(248, 81, 73, 0.14);
+  --paper:          #F5EFD8;
+  --paper-ink:      #2A2620;
+  --paper-rule:     rgba(42, 38, 32, 0.18);
+  --paper-margin:   #E7DEC2;
+  --glass-bg:       rgba(13, 17, 23, 0.78);
+  --glass-blur:     blur(20px) saturate(140%);
+
+  --grad-hero:      linear-gradient(135deg, #3FB950 0%, #238636 35%, #0D1117 100%);
+  --grad-surface:   radial-gradient(at 0% 0%, rgba(63, 185, 80, 0.08) 0%, transparent 55%),
+                    radial-gradient(at 100% 100%, rgba(63, 185, 80, 0.03) 0%, transparent 60%),
+                    var(--bg-0);
+  --grad-card:      linear-gradient(160deg, var(--bg-1) 0%, var(--bg-0) 100%);
+  --grad-emerald:   linear-gradient(135deg, #56D364 0%, #3FB950 50%, #238636 100%);
+  --grad-emerald-glow: radial-gradient(at 30% 0%, rgba(86, 211, 100, 0.30) 0%, transparent 60%);
+  --grad-topbar:    linear-gradient(90deg, rgba(63, 185, 80, 0.05), transparent 40%);
+}
+
+:root[data-theme="selah-mocha"],
+:root[data-theme="catppuccin-mocha"] {
+  --bg-0:        #1E1E2E;
+  --bg-1:        #181825;
+  --bg-2:        #313244;
+  --bg-3:        #45475A;
+  --line:        rgba(205, 214, 244, 0.08);
+  --line-strong: rgba(205, 214, 244, 0.16);
+  --ink-0:       #CDD6F4;
+  --ink-1:       #BAC2DE;
+  --ink-2:       #7F849C;
+  --ink-3:       #585B70;
+  --emerald:        #A6E3A1;
+  --emerald-deep:   #74C7A0;
+  --emerald-bright: #C9F0BD;
+  --emerald-glow:   rgba(166, 227, 161, 0.14);
+  --emerald-mist:   rgba(166, 227, 161, 0.05);
+  --ruby:           #F38BA8;
+  --ruby-deep:      #EB5E83;
+  --ruby-glow:      rgba(243, 139, 168, 0.14);
+  --paper:          #F5EFD8;
+  --paper-ink:      #2A2620;
+  --paper-rule:     rgba(42, 38, 32, 0.18);
+  --paper-margin:   #E7DEC2;
+  --glass-bg:       rgba(30, 30, 46, 0.78);
+  --glass-blur:     blur(20px) saturate(140%);
+
+  --grad-hero:      linear-gradient(135deg, #A6E3A1 0%, #74C7A0 35%, #1E1E2E 100%);
+  --grad-surface:   radial-gradient(at 0% 0%, rgba(166, 227, 161, 0.08) 0%, transparent 55%),
+                    radial-gradient(at 100% 100%, rgba(243, 139, 168, 0.06) 0%, transparent 60%),
+                    var(--bg-0);
+  --grad-card:      linear-gradient(160deg, var(--bg-1) 0%, var(--bg-0) 100%);
+  --grad-emerald:   linear-gradient(135deg, #C9F0BD 0%, #A6E3A1 50%, #74C7A0 100%);
+  --grad-emerald-glow: radial-gradient(at 30% 0%, rgba(201, 240, 189, 0.30) 0%, transparent 60%);
+  --grad-topbar:    linear-gradient(90deg, rgba(166, 227, 161, 0.05), transparent 40%);
+}
+
+/* ════════════════════ MODES ════════════════════ */
+
+:root[data-mode="regular"] {
+  --fs-xs:   11px;
+  --fs-sm:   12px;
+  --fs-base: 12px;
+  --fs-md:   14px;
+  --fs-lg:   17px;
+  --fs-xl:   20px;
+  --fs-hero: 28px;
+}
+:root[data-mode="extreme"] {
+  --fs-xs:   13px;
+  --fs-sm:   13px;
+  --fs-base: 14px;
+  --fs-md:   17px;
+  --fs-lg:   22px;
+  --fs-xl:   28px;
+  --fs-hero: 42px;
+}
+:root[data-mode="regular"] .entry-row,
+:root[data-mode="extreme"] .entry-row { padding: var(--sp-4) var(--sp-3); }
+:root[data-mode="extreme"] .score-tile { padding: var(--sp-5) var(--sp-6); }
+:root[data-mode="extreme"] .kcard,
+:root[data-mode="extreme"] .prayer-card,
+:root[data-mode="extreme"] .quiz-card { padding: var(--sp-4) var(--sp-5); }
+
+/* ════════════════════ TWEAKS ════════════════════ */
+
+/* scripture cursive */
+:root[data-tweak-scripture-cursive="on"] .scripture,
+:root[data-tweak-scripture-cursive="on"] .daily-ribbon,
+:root[data-tweak-scripture-cursive="on"] .bp-quote {
+  font-family: 'Cormorant Garamond', 'EB Garamond', Georgia, serif;
+  font-style: italic;
+  font-size: calc(var(--fs-base) + 2px);
+  letter-spacing: 0.005em;
+}
+
+/* jump glow */
+:root[data-tweak-jump-glow="on"] .palette-input:focus {
+  box-shadow: 0 0 0 1px var(--emerald), 0 0 24px var(--emerald-glow);
+}
+:root[data-tweak-jump-glow="on"] .palette-item.is-focused {
+  box-shadow: 0 0 16px var(--emerald-glow);
+}
+
+/* page animations */
+:root[data-tweak-animations="off"] *,
+:root[data-tweak-animations="off"] *::before,
+:root[data-tweak-animations="off"] *::after {
+  animation: none !important;
+  transition: none !important;
+}
+
+/* gradient intensity — scales glows + surface intensity */
+:root[data-tweak-gradient="soft"] body { background: var(--bg-0) !important; }
+:root[data-tweak-gradient="soft"] .kpi-card.is-hero::before,
+:root[data-tweak-gradient="soft"] .general-card::before,
+:root[data-tweak-gradient="soft"] body.welcome-mode #canvas::before { opacity: 0.15; }
+
+:root[data-tweak-gradient="bold"] .kpi-card.is-hero::before,
+:root[data-tweak-gradient="bold"] .general-card::before { opacity: 0.55; }
+:root[data-tweak-gradient="bold"] body.welcome-mode #canvas::before { opacity: 1; }
+:root[data-tweak-gradient="bold"] .btn.is-primary { box-shadow: 0 6px 20px var(--emerald-glow), 0 0 32px var(--emerald-glow), inset 0 1px 0 rgba(255,255,255,0.18); }
