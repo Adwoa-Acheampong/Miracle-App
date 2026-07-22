@@ -2,6 +2,11 @@ node_modules/
 build/
 dist/
 coverage/
+output/
+test-results/
+.playwright-cli/
+.tmp-*/
+.wrangler/
 .DS_Store
 *.log
 .env*

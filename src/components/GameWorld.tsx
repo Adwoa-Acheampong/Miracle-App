@@ -125,16 +125,16 @@ export const GameWorld: React.FC<GameWorldProps> = ({ onInteract, sparkleCount }
       // Draw World Background: Make it transparent so the HTML mesh-bg is visible
       ctx.clearRect(0, 0, w, h);
 
-      // 1. Draw subtle ambient fog layers at the bottom and center with indigo tones
+      // 1. Draw subtle ambient fog layers at the bottom and center with emerald tones
       const fogGrad = ctx.createRadialGradient(w / 2, h * 0.6, 50, w / 2, h * 0.6, Math.max(w, h) * 0.6);
-      fogGrad.addColorStop(0, "rgba(99, 102, 241, 0.1)"); // Indigo fog
-      fogGrad.addColorStop(0.5, "rgba(30, 27, 75, 0.03)"); // Dark purple shade
-      fogGrad.addColorStop(1, "rgba(15, 23, 42, 0)"); // Transparent end
+      fogGrad.addColorStop(0, "rgba(16, 185, 129, 0.1)"); // Emerald fog
+      fogGrad.addColorStop(0.5, "rgba(11, 23, 17, 0.03)"); // Black-jade shade
+      fogGrad.addColorStop(1, "rgba(5, 8, 6, 0)"); // Transparent end
       ctx.fillStyle = fogGrad;
       ctx.fillRect(0, 0, w, h);
 
-      // 2. Draw procedural pathways with elegant, ultra-thin purple veins connecting hot spots
-      ctx.strokeStyle = "rgba(168, 85, 247, 0.12)";
+      // 2. Draw procedural pathways with elegant, ultra-thin emerald veins connecting hot spots
+      ctx.strokeStyle = "rgba(52, 211, 153, 0.12)";
       ctx.lineWidth = 1;
       ctx.beginPath();
       // Well to Obelisk to Portal
@@ -168,7 +168,7 @@ export const GameWorld: React.FC<GameWorldProps> = ({ onInteract, sparkleCount }
             size: Math.random() * 2 + 1,
             alpha: 1.0,
             decay: 0.015,
-            color: "#ec4899", // Shimmering pink spark
+            color: "#D7B56D", // Restrained gold spark
             isSpark: true,
           });
         }
@@ -178,7 +178,7 @@ export const GameWorld: React.FC<GameWorldProps> = ({ onInteract, sparkleCount }
         pilgrim.isMoving = false;
       }
 
-      // Draw Pilgrim (glowing bright purple/indigo light orb)
+      // Draw Pilgrim (glowing bright emerald/jade light orb)
       const pilgrimGrad = ctx.createRadialGradient(
         pilgrim.x,
         pilgrim.y,
@@ -187,10 +187,10 @@ export const GameWorld: React.FC<GameWorldProps> = ({ onInteract, sparkleCount }
         pilgrim.y,
         pilgrim.size * 2.8
       );
-      pilgrimGrad.addColorStop(0, "#ffffff"); // Pure white focus center
-      pilgrimGrad.addColorStop(0.3, "#a855f7"); // Shimmering purple body
-      pilgrimGrad.addColorStop(0.7, "rgba(99, 102, 241, 0.3)"); // Indigo bloom
-      pilgrimGrad.addColorStop(1, "rgba(99, 102, 241, 0)"); // Fade
+      pilgrimGrad.addColorStop(0, "#F5F3EA"); // Pure white focus center
+      pilgrimGrad.addColorStop(0.3, "#34D399"); // Shimmering emerald body
+      pilgrimGrad.addColorStop(0.7, "rgba(16, 185, 129, 0.3)"); // Emerald bloom
+      pilgrimGrad.addColorStop(1, "rgba(16, 185, 129, 0)"); // Fade
 
       ctx.fillStyle = pilgrimGrad;
       ctx.beginPath();
@@ -212,14 +212,14 @@ export const GameWorld: React.FC<GameWorldProps> = ({ onInteract, sparkleCount }
         // Visual design of hotspots:
         // A subtle intermittent halo surrounds the active element
         if (isHovered) {
-          ctx.strokeStyle = "rgba(168, 85, 247, 0.45)";
+          ctx.strokeStyle = "rgba(52, 211, 153, 0.45)";
           ctx.lineWidth = 1.5;
           ctx.beginPath();
           ctx.arc(spot.x, spot.y, spot.radius + 8 + Math.sin(spot.pulsePhase * 2) * 2, 0, Math.PI * 2);
           ctx.stroke();
         } else {
           // Subtle natural intermittent halo
-          ctx.strokeStyle = "rgba(99, 102, 241, 0.12)";
+          ctx.strokeStyle = "rgba(16, 185, 129, 0.12)";
           ctx.lineWidth = 1;
           ctx.beginPath();
           ctx.arc(spot.x, spot.y, spot.radius + 4 + Math.sin(spot.pulsePhase) * 1.5, 0, Math.PI * 2);
@@ -228,12 +228,12 @@ export const GameWorld: React.FC<GameWorldProps> = ({ onInteract, sparkleCount }
 
         // Draw hotspot specific materials
         if (spot.id === "well") {
-          // Well of Whispers: Circular indigo pool of concentric waving light with cat-eye highlight
+          // Well of Whispers: Circular emerald pool of concentric light with a cat-eye highlight
           const wellGrad = ctx.createRadialGradient(spot.x, spot.y, 10, spot.x, spot.y, radius);
-          wellGrad.addColorStop(0, "#1e1b4b"); // Dark indigo core
-          wellGrad.addColorStop(0.6, "rgba(99, 102, 241, 0.4)"); // Indigo
-          wellGrad.addColorStop(0.9, "rgba(168, 85, 247, 0.25)"); // Purple ripple
-          wellGrad.addColorStop(1, "rgba(99, 102, 241, 0)");
+          wellGrad.addColorStop(0, "#0B1711"); // Black-jade core
+          wellGrad.addColorStop(0.6, "rgba(16, 185, 129, 0.4)"); // Emerald body
+          wellGrad.addColorStop(0.9, "rgba(52, 211, 153, 0.25)"); // Mint ripple
+          wellGrad.addColorStop(1, "rgba(16, 185, 129, 0)");
 
           ctx.fillStyle = wellGrad;
           ctx.beginPath();
@@ -241,14 +241,14 @@ export const GameWorld: React.FC<GameWorldProps> = ({ onInteract, sparkleCount }
           ctx.fill();
 
           // Ring border
-          ctx.strokeStyle = isHovered ? "rgba(168, 85, 247, 0.6)" : "rgba(99, 102, 241, 0.25)";
+          ctx.strokeStyle = isHovered ? "rgba(52, 211, 153, 0.6)" : "rgba(16, 185, 129, 0.25)";
           ctx.lineWidth = 1;
           ctx.beginPath();
           ctx.arc(spot.x, spot.y, radius - 4, 0, Math.PI * 2);
           ctx.stroke();
 
           // Cat-eye light streak
-          ctx.strokeStyle = "rgba(168, 85, 247, 0.4)";
+          ctx.strokeStyle = "rgba(52, 211, 153, 0.4)";
           ctx.lineWidth = 2;
           ctx.beginPath();
           const offset = Math.sin(spot.ambientPhase * 3) * (radius * 0.6);
@@ -256,13 +256,13 @@ export const GameWorld: React.FC<GameWorldProps> = ({ onInteract, sparkleCount }
           ctx.stroke();
 
         } else if (spot.id === "obelisk") {
-          // Obelisk of Truth: Monolithic prism with glowing purple/pink edges
+          // Obelisk of Truth: Monolithic prism with emerald and gold edges
           const heightOb = radius * 1.4;
           const widthOb = radius * 0.45;
 
           // Drawing monolithic shadow base
-          ctx.fillStyle = "rgba(30, 27, 75, 0.85)"; // Dark purple-indigo
-          ctx.strokeStyle = isHovered ? "#ec4899" : "#a855f7"; // Pink / Purple edges
+          ctx.fillStyle = "rgba(11, 23, 17, 0.85)"; // Black-jade glass
+          ctx.strokeStyle = isHovered ? "#D7B56D" : "#34D399"; // Gold / emerald edges
           ctx.lineWidth = 1.5;
 
           ctx.beginPath();
@@ -288,7 +288,7 @@ export const GameWorld: React.FC<GameWorldProps> = ({ onInteract, sparkleCount }
           ctx.lineTo(bx + widthOb, by - 10);
           ctx.lineTo(tx, ty);
           ctx.closePath();
-          ctx.fillStyle = "rgba(15, 23, 42, 0.92)"; // Darker slate side
+          ctx.fillStyle = "rgba(5, 8, 6, 0.92)"; // Darker slate side
           ctx.fill();
           ctx.stroke();
 
@@ -302,13 +302,13 @@ export const GameWorld: React.FC<GameWorldProps> = ({ onInteract, sparkleCount }
               size: Math.random() * 1.8 + 1,
               alpha: 0.9,
               decay: 0.012,
-              color: "#f5f3ff", // Lavender white
+              color: "#ECFDF5", // Mint white
               isSpark: true,
             });
           }
 
         } else if (spot.id === "portal") {
-          // Portal of Light: Shimmering ellipse with moving pink highlight
+          // Portal of Light: Shimmering ellipse with a moving gold highlight
           ctx.save();
           ctx.translate(spot.x, spot.y);
           ctx.rotate(Math.PI / 6); // slanted portal
@@ -317,21 +317,21 @@ export const GameWorld: React.FC<GameWorldProps> = ({ onInteract, sparkleCount }
           const pRadiusY = radius * 1.1;
 
           // Base dark interior
-          ctx.fillStyle = "rgba(15, 23, 42, 0.8)";
+          ctx.fillStyle = "rgba(5, 8, 6, 0.8)";
           ctx.beginPath();
           ctx.ellipse(0, 0, pRadiusX, pRadiusY, 0, 0, Math.PI * 2);
           ctx.fill();
 
-          // Moving pink highlight gradient portal
+          // Moving gold highlight gradient portal
           const portalGrad = ctx.createLinearGradient(
             -pRadiusX + Math.sin(spot.ambientPhase * 4) * pRadiusX * 0.4, 
             0, 
             pRadiusX + Math.sin(spot.ambientPhase * 4) * pRadiusX * 0.4, 
             0
           );
-          portalGrad.addColorStop(0, "rgba(99, 102, 241, 0.1)");
-          portalGrad.addColorStop(0.5, "rgba(236, 72, 153, 0.5)"); // hot pink moving highlight
-          portalGrad.addColorStop(1, "rgba(168, 85, 247, 0.1)");
+          portalGrad.addColorStop(0, "rgba(16, 185, 129, 0.1)");
+          portalGrad.addColorStop(0.5, "rgba(215, 181, 109, 0.5)"); // warm gold moving highlight
+          portalGrad.addColorStop(1, "rgba(52, 211, 153, 0.1)");
 
           ctx.fillStyle = portalGrad;
           ctx.beginPath();
@@ -339,7 +339,7 @@ export const GameWorld: React.FC<GameWorldProps> = ({ onInteract, sparkleCount }
           ctx.fill();
 
           // Thin outer ring
-          ctx.strokeStyle = isHovered ? "#ec4899" : "rgba(168, 85, 247, 0.35)";
+          ctx.strokeStyle = isHovered ? "#D7B56D" : "rgba(52, 211, 153, 0.35)";
           ctx.lineWidth = 1;
           ctx.beginPath();
           ctx.ellipse(0, 0, pRadiusX, pRadiusY, 0, 0, Math.PI * 2);
@@ -352,9 +352,9 @@ export const GameWorld: React.FC<GameWorldProps> = ({ onInteract, sparkleCount }
           const altarW = radius * 1.15;
           const altarH = 16;
 
-          // Draw dark purple altar base
-          ctx.fillStyle = "rgba(30, 27, 75, 0.6)"; // Dark purple-indigo
-          ctx.strokeStyle = "rgba(168, 85, 247, 0.25)";
+          // Draw black-jade altar base
+          ctx.fillStyle = "rgba(11, 23, 17, 0.6)"; // Black-jade glass
+          ctx.strokeStyle = "rgba(52, 211, 153, 0.25)";
           ctx.lineWidth = 1;
 
           // Lower step
@@ -362,15 +362,15 @@ export const GameWorld: React.FC<GameWorldProps> = ({ onInteract, sparkleCount }
           ctx.strokeRect(spot.x - altarW / 2, spot.y + 4, altarW, altarH);
 
           // Upper step
-          ctx.fillStyle = "rgba(15, 23, 42, 0.8)"; // Dark slate
+          ctx.fillStyle = "rgba(5, 8, 6, 0.8)"; // Dark slate
           ctx.fillRect(spot.x - altarW * 0.35, spot.y - 10, altarW * 0.7, altarH);
           ctx.strokeRect(spot.x - altarW * 0.35, spot.y - 10, altarW * 0.7, altarH);
 
-          // Soft purple hearth flame aura
+          // Soft emerald hearth flame aura
           const auraGrad = ctx.createRadialGradient(spot.x, spot.y - 12, 0, spot.x, spot.y - 12, radius * 0.8);
-          auraGrad.addColorStop(0, "rgba(168, 85, 247, 0.2)");
-          auraGrad.addColorStop(0.6, "rgba(99, 102, 241, 0.05)");
-          auraGrad.addColorStop(1, "rgba(15, 23, 42, 0)");
+          auraGrad.addColorStop(0, "rgba(52, 211, 153, 0.2)");
+          auraGrad.addColorStop(0.6, "rgba(16, 185, 129, 0.05)");
+          auraGrad.addColorStop(1, "rgba(5, 8, 6, 0)");
           ctx.fillStyle = auraGrad;
           ctx.beginPath();
           ctx.arc(spot.x, spot.y - 12, radius * 0.8, 0, Math.PI * 2);
@@ -386,14 +386,14 @@ export const GameWorld: React.FC<GameWorldProps> = ({ onInteract, sparkleCount }
               size: Math.random() * 1.8 + 0.8,
               alpha: 0.9,
               decay: 0.009,
-              color: "#f5f3ff",
+              color: "#ECFDF5",
               isSpark: true,
             });
           }
         }
 
         // Draw HUD Hotspot Text: elegant micro-labels in JetBrains Mono or DM Sans
-        ctx.fillStyle = isHovered ? "#f5f3ff" : "#94a3b8"; // Lavender white vs slate gray
+        ctx.fillStyle = isHovered ? "#ECFDF5" : "#9AAFA3"; // Mint white vs muted jade
         ctx.font = "11px 'DM Sans', sans-serif";
         ctx.textAlign = "center";
         ctx.fillText(spot.label.toUpperCase(), spot.x, spot.y + spot.radius + 18);
@@ -409,7 +409,7 @@ export const GameWorld: React.FC<GameWorldProps> = ({ onInteract, sparkleCount }
           size: Math.random() * 1.8 + 0.6,
           alpha: Math.random() * 0.4 + 0.1,
           decay: 0.003 + Math.random() * 0.003,
-          color: "#94a3b8", // Muted slate sparkle
+          color: "#9AAFA3", // Muted slate sparkle
           isSpark: false,
         });
       }
@@ -450,7 +450,7 @@ export const GameWorld: React.FC<GameWorldProps> = ({ onInteract, sparkleCount }
 
       // Draw active player interactive helper/feedback indicator
       if (pilgrim.isMoving) {
-        ctx.strokeStyle = "rgba(168, 85, 247, 0.15)";
+        ctx.strokeStyle = "rgba(52, 211, 153, 0.15)";
         ctx.lineWidth = 1;
         ctx.beginPath();
         ctx.arc(pilgrim.targetX, pilgrim.targetY, 4, 0, Math.PI * 2);
@@ -515,7 +515,7 @@ export const GameWorld: React.FC<GameWorldProps> = ({ onInteract, sparkleCount }
           size: Math.random() * 2 + 1,
           alpha: 1.0,
           decay: 0.03,
-          color: "rgba(168, 85, 247, 0.65)", // Shimmering purple
+          color: "rgba(52, 211, 153, 0.65)", // Shimmering emerald
           isSpark: true,
         });
       }
@@ -562,12 +562,13 @@ export const GameWorld: React.FC<GameWorldProps> = ({ onInteract, sparkleCount }
         onMouseLeave={() => setHoveredHotspot(null)}
         className="block w-full h-full"
         id="game-world-canvas"
+        aria-hidden="true"
       />
 
       {/* Accessible HTML equivalents for screen readers */}
       <div className="sr-only">
-        <h2>Interactive Elements of the Miracle Sanctuary</h2>
-        <p>The sanctuary is styled in dark obsidian pathways and deep glowing emerald lights.</p>
+        <h2>Interactive Elements of the Miracle Living House</h2>
+        <p>The house is styled in dark obsidian pathways and deep glowing emerald lights.</p>
         <ul>
           <li><button onClick={() => onInteract("well")}>Enter the Well of Whispers to offer gratitude and thoughts.</button></li>
           <li><button onClick={() => onInteract("obelisk")}>Read the Obelisk of Truth to discover scriptures and wisdom.</button></li>

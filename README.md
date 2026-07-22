@@ -1,20 +1,51 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
-</div>
+# Miracle: The Living House
 
-# Run and deploy your AI Studio app
+An immersive, full-screen life game where reflection, breath, gratitude, and real-world action make a living world respond.
 
-This contains everything you need to run your app locally.
+This build combines the original repository's fast React interaction model, frosted-glass interface, DM Sans typography, and procedural sound design with the Hobonichi prototype's obsidian-black atmosphere, emerald light, restrained gold accents, and Living House identity.
 
-View your app in AI Studio: https://ai.studio/apps/67a377f3-e26c-42d0-a3c5-4d9d77c943a4
+## Experience
 
-## Run Locally
+- Responsive canvas world with four interactive landmarks
+- Frosted-glass HUD and contextual sheets
+- Synthesized water ambience, hover tones, confirmations, and reward sounds
+- Local progress for sparks, discoveries, and history
+- Reduced-motion support and keyboard-accessible alternatives
+- Gemini-backed reflection endpoints with server-side key handling
 
-**Prerequisites:**  Node.js
+## Run locally
 
+Requirements: Node.js 20 or newer.
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+```bash
+npm install
+```
+
+Copy `.env.example` to `.env.local` and set `GEMINI_API_KEY`, then run:
+
+```bash
+npm run dev
+```
+
+Open the local URL printed by the server.
+
+## Verify
+
+```bash
+npm run check
+```
+
+This runs the TypeScript check and production build.
+
+## Visual system
+
+- Obsidian: `#050806`
+- Black jade: `#0B1711`
+- Emerald: `#10B981`
+- Bright emerald: `#34D399`
+- Miracle gold: `#D7B56D`
+- Interface: DM Sans
+- Reflective copy: Cormorant Garamond italic
+- Numeric detail: JetBrains Mono
+
+Sound remains muted until the player chooses **Wake the House**.

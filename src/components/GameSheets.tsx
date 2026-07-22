@@ -35,8 +35,6 @@ export const GameSheets: React.FC<GameSheetsProps> = ({
   discoveredMiracles,
   onAddMiracle,
 }) => {
-  if (activeSheet === "none") return null;
-
   // Loading and Error states
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -129,14 +127,14 @@ export const GameSheets: React.FC<GameSheetsProps> = ({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ theme: reflectionFocus, input: reflectionInput }),
       });
-      if (!res.ok) throw new Error("The sanctuary is silent right now.");
+      if (!res.ok) throw new Error("The house is quiet right now.");
       const data: ReflectionResponse = await res.json();
       setReflectionResult(data);
       onAddSparkles(10, `Gained wisdom reflecting on the theme of ${reflectionFocus}`);
       playSoundReward();
     } catch (err: any) {
       playSoundError();
-      setErrorMsg(err.message || "Could not connect to the sacred whisperer.");
+      setErrorMsg(err.message || "The house could not answer just now.");
     } finally {
       setLoading(false);
     }
@@ -213,6 +211,8 @@ export const GameSheets: React.FC<GameSheetsProps> = ({
     }
   };
 
+  if (activeSheet === "none") return null;
+
   return (
     <div 
       className="absolute bottom-0 left-0 right-0 z-50 flex flex-col items-center justify-end"
@@ -220,7 +220,7 @@ export const GameSheets: React.FC<GameSheetsProps> = ({
     >
       {/* Background Dim Backdrop */}
       <div 
-        className="fixed inset-0 bg-[#0f172a]/50 backdrop-blur-sm transition-opacity duration-300"
+        className="fixed inset-0 bg-[#050806]/50 backdrop-blur-sm transition-opacity duration-300"
         style={{ pointerEvents: "auto" }}
         onClick={onClose}
       />
@@ -235,13 +235,13 @@ export const GameSheets: React.FC<GameSheetsProps> = ({
         }}
       >
         {/* Absolute Sparkling Decor */}
-        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-indigo-500 to-transparent" />
+        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-emerald-500 to-transparent" />
 
         {/* Header */}
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-[#a855f7]" />
-            <h3 className="text-sm font-medium tracking-widest text-[#f5f3ff] uppercase">
+            <Sparkles className="w-4 h-4 text-[#34D399]" />
+            <h3 className="text-sm font-medium tracking-widest text-[#ECFDF5] uppercase">
               {activeSheet === "well" && "Well of Whispers"}
               {activeSheet === "obelisk" && "Obelisk of Truth"}
               {activeSheet === "portal" && "Portal of Light"}
@@ -252,7 +252,9 @@ export const GameSheets: React.FC<GameSheetsProps> = ({
           </div>
           <button 
             onClick={onClose}
-            className="p-1.5 rounded-full hover:bg-white/5 text-[#94a3b8] hover:text-[#f5f3ff] transition-colors"
+            onPointerEnter={playSoundEnter}
+            aria-label="Close panel"
+            className="p-1.5 rounded-full hover:bg-white/5 text-[#9AAFA3] hover:text-[#ECFDF5] transition-colors"
             style={{ minWidth: 44, minHeight: 44, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
           >
             <X className="w-5 h-5" />
@@ -263,7 +265,7 @@ export const GameSheets: React.FC<GameSheetsProps> = ({
         <div className="overflow-y-auto max-h-[50vh] pr-1 custom-scroll">
           
           {errorMsg && (
-            <div className="p-3 mb-4 text-xs rounded border border-red-950 bg-red-950/20 text-[#55EFB8]">
+            <div role="alert" className="p-3 mb-4 text-xs rounded border border-[#D7B56D]/30 bg-[#D7B56D]/10 text-[#F5F3EA]">
               {errorMsg}
             </div>
           )}
@@ -273,13 +275,13 @@ export const GameSheets: React.FC<GameSheetsProps> = ({
             <div className="space-y-4">
               {!reflectionResult ? (
                 <>
-                  <p className="text-xs text-[#94a3b8] leading-relaxed">
+                  <p className="text-xs text-[#9AAFA3] leading-relaxed">
                     Select a theme to anchor your awareness, then formulate your question to the monolith.
                   </p>
 
                   {/* Focus Picker */}
                   <div className="space-y-1.5">
-                    <label className="text-[10px] uppercase tracking-wider text-[#94a3b8]">Anchor Theme</label>
+                    <label className="text-[10px] uppercase tracking-wider text-[#9AAFA3]">Anchor Theme</label>
                     <div className="grid grid-cols-3 gap-2">
                       {["Silence", "Acceptance", "Patience", "Mystery", "Alignment", "Eternity"].map((focus) => (
                         <button
@@ -290,8 +292,8 @@ export const GameSheets: React.FC<GameSheetsProps> = ({
                           }}
                           className={`py-2 px-1 text-xs text-center border rounded transition-all duration-150 ${
                             reflectionFocus === focus
-                              ? "bg-indigo-500/25 border-[#a855f7] text-[#f5f3ff]"
-                              : "bg-white/5 border-white/10 text-[#94a3b8] hover:border-white/20"
+                              ? "bg-emerald-500/25 border-[#34D399] text-[#ECFDF5]"
+                              : "bg-white/5 border-white/10 text-[#9AAFA3] hover:border-white/20"
                           }`}
                         >
                           {focus}
@@ -302,12 +304,12 @@ export const GameSheets: React.FC<GameSheetsProps> = ({
 
                   {/* Input field */}
                   <div className="space-y-2">
-                    <label className="text-[10px] uppercase tracking-wider text-[#94a3b8]">Your Seeking Heart</label>
+                    <label className="text-[10px] uppercase tracking-wider text-[#9AAFA3]">Your Seeking Heart</label>
                     <textarea
                       value={reflectionInput}
                       onChange={(e) => setReflectionInput(e.target.value)}
                       placeholder="e.g. 'How can I find peace when the days feel chaotic and fast?'"
-                      className="w-full min-h-[70px] p-3 text-xs text-[#f8fafc] bg-white/5 border border-white/10 rounded focus:border-[#a855f7] focus:outline-none transition-colors"
+                      className="w-full min-h-[70px] p-3 text-xs text-[#F7FAF8] bg-white/5 border border-white/10 rounded focus:border-[#34D399] focus:outline-none transition-colors"
                     />
                   </div>
 
@@ -315,11 +317,11 @@ export const GameSheets: React.FC<GameSheetsProps> = ({
                   <button
                     onClick={handleSeekTruth}
                     disabled={loading}
-                    className="w-full py-3 px-4 flex items-center justify-center gap-2 bg-white text-indigo-950 font-bold text-xs rounded-full transition-all duration-200 uppercase tracking-widest disabled:opacity-40 shadow-lg"
+                    className="w-full py-3 px-4 flex items-center justify-center gap-2 bg-white text-emerald-950 font-bold text-xs rounded-full transition-all duration-200 uppercase tracking-widest disabled:opacity-40 shadow-lg"
                     style={{ minHeight: 44 }}
                   >
                     {loading ? (
-                      <div className="w-4 h-4 border-2 border-indigo-950 border-t-transparent rounded-full animate-spin" />
+                      <div className="w-4 h-4 border-2 border-emerald-950 border-t-transparent rounded-full animate-spin" />
                     ) : (
                       <>
                         <span>Seek Wisdom</span>
@@ -331,33 +333,33 @@ export const GameSheets: React.FC<GameSheetsProps> = ({
               ) : (
                 <div className="space-y-5 animate-fadeIn">
                   {/* Scripture */}
-                  <div className="p-4 glass-card border-l-2 border-[#a855f7] rounded-xl">
-                    <p className="font-serif italic text-base text-[#f5f3ff] leading-relaxed">
+                  <div className="p-4 glass-card border-l-2 border-[#34D399] rounded-xl">
+                    <p className="font-serif italic text-base text-[#ECFDF5] leading-relaxed">
                       {reflectionResult.scripture}
                     </p>
                   </div>
 
                   {/* Reflection Body */}
                   <div className="space-y-2">
-                    <h4 className="text-[10px] uppercase tracking-widest text-[#94a3b8]">Reflection</h4>
-                    <p className="text-xs text-[#f8fafc] leading-relaxed">
+                    <h4 className="text-[10px] uppercase tracking-widest text-[#9AAFA3]">Reflection</h4>
+                    <p className="text-xs text-[#F7FAF8] leading-relaxed">
                       {reflectionResult.reflection}
                     </p>
                   </div>
 
                   {/* Action recommendation */}
-                  <div className="p-3 bg-indigo-500/10 border border-indigo-500/20 rounded-xl flex items-start gap-2.5">
-                    <Info className="w-4 h-4 text-[#a855f7] shrink-0 mt-0.5" />
+                  <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-start gap-2.5">
+                    <Info className="w-4 h-4 text-[#34D399] shrink-0 mt-0.5" />
                     <div className="space-y-0.5">
-                      <span className="text-[10px] uppercase tracking-wider text-[#a855f7] font-medium">Contemplative Action</span>
-                      <p className="text-xs text-[#f8fafc] leading-relaxed">{reflectionResult.action}</p>
+                      <span className="text-[10px] uppercase tracking-wider text-[#34D399] font-medium">Contemplative Action</span>
+                      <p className="text-xs text-[#F7FAF8] leading-relaxed">{reflectionResult.action}</p>
                     </div>
                   </div>
 
                   {/* Seek again buttons */}
                   <button
                     onClick={() => setReflectionResult(null)}
-                    className="w-full py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 text-[#a855f7] text-xs font-medium rounded-full transition-all tracking-wider uppercase"
+                    className="w-full py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 text-[#34D399] text-xs font-medium rounded-full transition-all tracking-wider uppercase"
                     style={{ minHeight: 44 }}
                   >
                     Formulate Another Query
@@ -372,28 +374,28 @@ export const GameSheets: React.FC<GameSheetsProps> = ({
             <div className="space-y-4">
               {!showWellAnimation ? (
                 <>
-                  <p className="text-xs text-[#94a3b8] leading-relaxed">
+                  <p className="text-xs text-[#9AAFA3] leading-relaxed">
                     Whisper a moment of gratitude, a simple beauty, or an act of goodness you observed today into the deep waters.
                   </p>
 
                   <div className="space-y-2">
-                    <label className="text-[10px] uppercase tracking-wider text-[#94a3b8]">Your Offering of Remembrance</label>
+                    <label className="text-[10px] uppercase tracking-wider text-[#9AAFA3]">Your Offering of Remembrance</label>
                     <textarea
                       value={journalInput}
                       onChange={(e) => setJournalInput(e.target.value)}
                       placeholder="e.g. 'The kindness of a stranger who stopped to help carry my groceries...'"
-                      className="w-full min-h-[90px] p-3 text-xs text-[#f8fafc] bg-white/5 border border-white/10 rounded focus:border-[#a855f7] focus:outline-none transition-colors"
+                      className="w-full min-h-[90px] p-3 text-xs text-[#F7FAF8] bg-white/5 border border-white/10 rounded focus:border-[#34D399] focus:outline-none transition-colors"
                     />
                   </div>
 
                   <button
                     onClick={handleOfferGratitude}
                     disabled={loading}
-                    className="w-full py-3 px-4 flex items-center justify-center gap-2 bg-white text-indigo-950 font-bold text-xs rounded-full transition-all duration-200 uppercase tracking-widest disabled:opacity-40 shadow-lg"
+                    className="w-full py-3 px-4 flex items-center justify-center gap-2 bg-white text-emerald-950 font-bold text-xs rounded-full transition-all duration-200 uppercase tracking-widest disabled:opacity-40 shadow-lg"
                     style={{ minHeight: 44 }}
                   >
                     {loading ? (
-                      <div className="w-4 h-4 border-2 border-indigo-950 border-t-transparent rounded-full animate-spin" />
+                      <div className="w-4 h-4 border-2 border-emerald-950 border-t-transparent rounded-full animate-spin" />
                     ) : (
                       <>
                         <span>Drop Into Water</span>
@@ -413,26 +415,26 @@ export const GameSheets: React.FC<GameSheetsProps> = ({
                 >
                   {/* Radiant Water Ripple Decoration */}
                   <div className="relative w-16 h-16 mx-auto mb-3 flex items-center justify-center">
-                    <div className="absolute inset-0 rounded-full bg-indigo-500/10 animate-ping" />
-                    <div className="absolute w-12 h-12 rounded-full border border-[#a855f7]/30 animate-pulse flex items-center justify-center">
-                      <Heart className="w-5 h-5 text-[#a855f7]" />
+                    <div className="absolute inset-0 rounded-full bg-emerald-500/10 animate-ping" />
+                    <div className="absolute w-12 h-12 rounded-full border border-[#34D399]/30 animate-pulse flex items-center justify-center">
+                      <Heart className="w-5 h-5 text-[#34D399]" />
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <span className="text-[10px] uppercase tracking-widest text-[#a855f7]">Water Blessing Received</span>
-                    <p className="font-serif italic text-base text-[#f5f3ff] leading-relaxed px-2">
+                    <span className="text-[10px] uppercase tracking-widest text-[#34D399]">Water Blessing Received</span>
+                    <p className="font-serif italic text-base text-[#ECFDF5] leading-relaxed px-2">
                       {journalResult?.blessing}
                     </p>
                   </div>
 
                   {/* Earned spark counter */}
-                  <div className="inline-flex items-center gap-1.5 py-1.5 px-3 bg-white/5 border border-white/10 rounded-full text-xs text-[#a855f7] font-mono">
+                  <div className="inline-flex items-center gap-1.5 py-1.5 px-3 bg-white/5 border border-white/10 rounded-full text-xs text-[#34D399] font-mono">
                     <Sparkles className="w-3.5 h-3.5" />
                     <span>+{journalResult?.sparkles} SPARKLES UNLOCKED</span>
                   </div>
 
-                  <p className="text-[9px] text-[#94a3b8] uppercase tracking-widest animate-pulse">
+                  <p className="text-[9px] text-[#9AAFA3] uppercase tracking-widest animate-pulse">
                     Tap anywhere to return to world
                   </p>
                 </div>
@@ -445,12 +447,12 @@ export const GameSheets: React.FC<GameSheetsProps> = ({
             <div className="space-y-4">
               {!miracleResult ? (
                 <>
-                  <p className="text-xs text-[#94a3b8] leading-relaxed">
+                  <p className="text-xs text-[#9AAFA3] leading-relaxed">
                     Venture into the portal to seek daily, unseen synchronicity and everyday miracles happening right now.
                   </p>
 
                   <div className="space-y-1.5">
-                    <label className="text-[10px] uppercase tracking-wider text-[#94a3b8]">Select Lens of Seeking</label>
+                    <label className="text-[10px] uppercase tracking-wider text-[#9AAFA3]">Select Lens of Seeking</label>
                     <div className="grid grid-cols-2 gap-2">
                       {[
                         { id: "Human Kindness", label: "Kind Connection" },
@@ -466,11 +468,11 @@ export const GameSheets: React.FC<GameSheetsProps> = ({
                           }}
                           className={`py-2.5 px-2 text-xs text-left border rounded transition-all duration-150 flex items-center gap-2 ${
                             portalCategory === cat.id
-                              ? "bg-indigo-500/25 border-[#a855f7] text-[#f5f3ff]"
-                              : "bg-white/5 border-white/10 text-[#94a3b8] hover:border-white/20"
+                              ? "bg-emerald-500/25 border-[#34D399] text-[#ECFDF5]"
+                              : "bg-white/5 border-white/10 text-[#9AAFA3] hover:border-white/20"
                           }`}
                         >
-                          <Compass className="w-3.5 h-3.5 opacity-60 text-[#a855f7]" />
+                          <Compass className="w-3.5 h-3.5 opacity-60 text-[#34D399]" />
                           <span>{cat.label}</span>
                         </button>
                       ))}
@@ -480,11 +482,11 @@ export const GameSheets: React.FC<GameSheetsProps> = ({
                   <button
                     onClick={handleVenturePortal}
                     disabled={loading}
-                    className="w-full py-3 px-4 flex items-center justify-center gap-2 bg-white text-indigo-950 font-bold text-xs rounded-full transition-all duration-200 uppercase tracking-widest disabled:opacity-40 shadow-lg"
+                    className="w-full py-3 px-4 flex items-center justify-center gap-2 bg-white text-emerald-950 font-bold text-xs rounded-full transition-all duration-200 uppercase tracking-widest disabled:opacity-40 shadow-lg"
                     style={{ minHeight: 44 }}
                   >
                     {loading ? (
-                      <div className="w-4 h-4 border-2 border-indigo-950 border-t-transparent rounded-full animate-spin" />
+                      <div className="w-4 h-4 border-2 border-emerald-950 border-t-transparent rounded-full animate-spin" />
                     ) : (
                       <>
                         <span>Venture Into Portal</span>
@@ -504,28 +506,28 @@ export const GameSheets: React.FC<GameSheetsProps> = ({
                 >
                   <div className="p-4 glass-card border border-white/10 rounded-xl space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] uppercase tracking-widest text-[#a855f7] font-mono">Miracle Discovered</span>
-                      <span className="text-[10px] text-[#94a3b8] uppercase tracking-wider">{portalCategory}</span>
+                      <span className="text-[10px] uppercase tracking-widest text-[#34D399] font-mono">Miracle Discovered</span>
+                      <span className="text-[10px] text-[#9AAFA3] uppercase tracking-wider">{portalCategory}</span>
                     </div>
 
-                    <h4 className="text-sm font-medium text-[#f5f3ff] leading-snug">{miracleResult.title}</h4>
+                    <h4 className="text-sm font-medium text-[#ECFDF5] leading-snug">{miracleResult.title}</h4>
                     
-                    <p className="text-xs text-[#f8fafc] leading-relaxed">
+                    <p className="text-xs text-[#F7FAF8] leading-relaxed">
                       {miracleResult.description}
                     </p>
 
                     <div className="pt-2 border-t border-white/10">
-                      <span className="text-[10px] uppercase tracking-widest text-[#94a3b8] block">Core Insight</span>
-                      <p className="font-serif italic text-xs text-[#a855f7] mt-0.5">{miracleResult.insight}</p>
+                      <span className="text-[10px] uppercase tracking-widest text-[#9AAFA3] block">Core Insight</span>
+                      <p className="font-serif italic text-xs text-[#34D399] mt-0.5">{miracleResult.insight}</p>
                     </div>
                   </div>
 
-                  <div className="flex justify-between items-center py-2 px-3 bg-indigo-500/10 rounded-full border border-indigo-500/20 text-xs text-[#a855f7] font-mono">
+                  <div className="flex justify-between items-center py-2 px-3 bg-emerald-500/10 rounded-full border border-emerald-500/20 text-xs text-[#34D399] font-mono">
                     <div className="flex items-center gap-1.5">
                       <Sparkles className="w-3.5 h-3.5" />
                       <span>+{miracleResult.sparkles} SPARKLES ACCUMULATED</span>
                     </div>
-                    <span className="text-[9px] text-[#94a3b8] uppercase tracking-widest">Tap to close</span>
+                    <span className="text-[9px] text-[#9AAFA3] uppercase tracking-widest">Tap to close</span>
                   </div>
                 </div>
               )}
@@ -537,14 +539,14 @@ export const GameSheets: React.FC<GameSheetsProps> = ({
             <div className="space-y-5 py-2">
               {breathPhase === "idle" ? (
                 <div className="space-y-4">
-                  <p className="text-xs text-[#94a3b8] leading-relaxed">
-                    Still your thoughts and align your breath with the sanctuary. Completed breath cycles reward you with genuine Miracle Sparkles (+15).
+                  <p className="text-xs text-[#9AAFA3] leading-relaxed">
+                    Still your thoughts and align your breath with the house. Completed breath cycles reward you with genuine Miracle Sparkles (+15).
                   </p>
 
                   <div className="p-3.5 rounded-xl glass-card border border-white/10 space-y-2">
-                    <span className="text-[10px] uppercase tracking-widest text-[#a855f7] block font-medium">Contemplative Pattern</span>
-                    <p className="text-xs text-[#f8fafc] leading-relaxed">
-                      Follow the glowing circle: <strong className="text-[#a855f7]">Inhale</strong> (4s) → <strong className="text-[#a855f7]">Hold</strong> (4s) → <strong className="text-[#a855f7]">Exhale</strong> (4s) → <strong className="text-[#a855f7]">Hold</strong> (4s).
+                    <span className="text-[10px] uppercase tracking-widest text-[#34D399] block font-medium">Contemplative Pattern</span>
+                    <p className="text-xs text-[#F7FAF8] leading-relaxed">
+                      Follow the glowing circle: <strong className="text-[#34D399]">Inhale</strong> (4s) → <strong className="text-[#34D399]">Hold</strong> (4s) → <strong className="text-[#34D399]">Exhale</strong> (4s) → <strong className="text-[#34D399]">Hold</strong> (4s).
                     </p>
                   </div>
 
@@ -554,7 +556,7 @@ export const GameSheets: React.FC<GameSheetsProps> = ({
                       setBreathTimer(4);
                       playSoundConfirm();
                     }}
-                    className="w-full py-3 px-4 flex items-center justify-center gap-2 bg-white text-indigo-950 font-bold text-xs rounded-full transition-all duration-200 uppercase tracking-widest shadow-lg"
+                    className="w-full py-3 px-4 flex items-center justify-center gap-2 bg-white text-emerald-950 font-bold text-xs rounded-full transition-all duration-200 uppercase tracking-widest shadow-lg"
                     style={{ minHeight: 44 }}
                   >
                     <span>Begin Alignment</span>
@@ -571,7 +573,7 @@ export const GameSheets: React.FC<GameSheetsProps> = ({
 
                     {/* Expand/Contract Circle */}
                     <div 
-                      className={`absolute rounded-full transition-all duration-1000 ease-in-out bg-gradient-to-br from-[#4f46e5] to-[#a855f7]`}
+                      className={`absolute rounded-full transition-all duration-1000 ease-in-out bg-gradient-to-br from-[#047857] to-[#34D399]`}
                       style={{
                         width: 
                           breathPhase === "inhale" ? "85%" : 
@@ -585,26 +587,26 @@ export const GameSheets: React.FC<GameSheetsProps> = ({
                           breathPhase === "inhale" ? 0.45 : 
                           breathPhase === "holdIn" ? 0.65 : 
                           breathPhase === "exhale" ? 0.25 : 0.15,
-                        boxShadow: breathPhase === "holdIn" ? "0 0 32px rgba(168, 85, 247, 0.45)" : "none"
+                        boxShadow: breathPhase === "holdIn" ? "0 0 32px rgba(52, 211, 153, 0.42)" : "none"
                       }}
                     />
 
                     {/* Pulse counter */}
                     <div className="relative z-10 flex flex-col items-center">
-                      <span className="text-2xl font-mono text-[#f5f3ff]">{breathTimer}</span>
-                      <span className="text-[10px] uppercase tracking-widest text-[#94a3b8]">seconds</span>
+                      <span className="text-2xl font-mono text-[#ECFDF5]">{breathTimer}</span>
+                      <span className="text-[10px] uppercase tracking-widest text-[#9AAFA3]">seconds</span>
                     </div>
                   </div>
 
                   <div className="space-y-1">
-                    <span className="text-sm font-medium text-[#f5f3ff] uppercase tracking-wider">
+                    <span className="text-sm font-medium text-[#ECFDF5] uppercase tracking-wider">
                       {breathPhase === "inhale" && "Inhale deeply"}
                       {breathPhase === "holdIn" && "Hold the breath"}
                       {breathPhase === "exhale" && "Exhale slowly"}
                       {breathPhase === "holdOut" && "Hold the void"}
                     </span>
-                    <p className="text-[10px] text-[#94a3b8] tracking-wide uppercase">
-                      Breath Cycles Aligned: <span className="font-mono text-[#a855f7]">{breathCyclesCompleted}</span>
+                    <p className="text-[10px] text-[#9AAFA3] tracking-wide uppercase">
+                      Breath Cycles Aligned: <span className="font-mono text-[#34D399]">{breathCyclesCompleted}</span>
                     </p>
                   </div>
 
@@ -613,7 +615,7 @@ export const GameSheets: React.FC<GameSheetsProps> = ({
                       setBreathPhase("idle");
                       playSoundConfirm();
                     }}
-                    className="py-2 px-5 bg-white/5 border border-white/10 text-[#94a3b8] hover:text-[#f5f3ff] text-xs font-medium rounded-full transition-all tracking-wider uppercase"
+                    className="py-2 px-5 bg-white/5 border border-white/10 text-[#9AAFA3] hover:text-[#ECFDF5] text-xs font-medium rounded-full transition-all tracking-wider uppercase"
                     style={{ minHeight: 44 }}
                   >
                     Cease Meditation
@@ -626,25 +628,25 @@ export const GameSheets: React.FC<GameSheetsProps> = ({
           {/* ==================== 5. HISTORY SHEET ==================== */}
           {activeSheet === "history" && (
             <div className="space-y-4">
-              <p className="text-xs text-[#94a3b8] leading-relaxed">
-                Your accumulated history of discovered miracles and divine insights.
+              <p className="text-xs text-[#9AAFA3] leading-relaxed">
+                Your accumulated history of discovered miracles and meaningful insights.
               </p>
 
               {discoveredMiracles.length === 0 ? (
                 <div className="p-6 text-center border border-dashed border-white/10 rounded-xl glass-card">
-                  <BookOpen className="w-6 h-6 text-[#a855f7] mx-auto mb-2 opacity-60" />
-                  <p className="text-xs text-[#94a3b8]">No chronicles have been written yet. Navigate the path to seek truth.</p>
+                  <BookOpen className="w-6 h-6 text-[#34D399] mx-auto mb-2 opacity-60" />
+                  <p className="text-xs text-[#9AAFA3]">No chronicles have been written yet. Navigate the path to seek truth.</p>
                 </div>
               ) : (
                 <div className="space-y-3">
                   {discoveredMiracles.map((mir) => (
                     <div key={mir.id} className="p-4 rounded-xl glass-card text-left space-y-1.5">
                       <div className="flex justify-between items-center">
-                        <span className="text-[9px] uppercase font-mono text-[#a855f7]">{mir.category}</span>
-                        <span className="text-[9px] font-mono text-[#94a3b8]">{mir.date}</span>
+                        <span className="text-[9px] uppercase font-mono text-[#34D399]">{mir.category}</span>
+                        <span className="text-[9px] font-mono text-[#9AAFA3]">{mir.date}</span>
                       </div>
-                      <h4 className="text-xs font-medium text-[#f5f3ff]">{mir.title}</h4>
-                      <p className="font-serif italic text-[11px] text-[#94a3b8] leading-relaxed">
+                      <h4 className="text-xs font-medium text-[#ECFDF5]">{mir.title}</h4>
+                      <p className="font-serif italic text-[11px] text-[#9AAFA3] leading-relaxed">
                         “{mir.insight}”
                       </p>
                     </div>
@@ -657,27 +659,27 @@ export const GameSheets: React.FC<GameSheetsProps> = ({
           {/* ==================== 6. QUEST SHEET ==================== */}
           {activeSheet === "quest" && (
             <div className="space-y-4">
-              <p className="text-xs text-[#94a3b8] leading-relaxed">
-                Complete contemplative quests by interacting with the sanctuary to earn ultimate Miracle Sparkles.
+              <p className="text-xs text-[#9AAFA3] leading-relaxed">
+                Complete contemplative quests by moving through the house to earn ultimate Miracle Sparkles.
               </p>
 
               <div className="space-y-3">
                 <div className="p-4 rounded-xl glass-card text-left space-y-2">
                   <div className="flex justify-between items-center">
-                    <span className="text-xs font-medium text-[#f5f3ff]">Chronicles Explorer</span>
-                    <span className="text-[10px] font-mono text-[#a855f7]">+30 Sparks</span>
+                    <span className="text-xs font-medium text-[#ECFDF5]">Chronicles Explorer</span>
+                    <span className="text-[10px] font-mono text-[#34D399]">+30 Sparks</span>
                   </div>
-                  <p className="text-[11px] text-[#94a3b8] leading-relaxed">
+                  <p className="text-[11px] text-[#9AAFA3] leading-relaxed">
                     Discover at least 3 distinct everyday miracles through the Portal of Light.
                   </p>
                   <div className="space-y-1">
-                    <div className="flex justify-between text-[9px] font-mono text-[#94a3b8]">
+                    <div className="flex justify-between text-[9px] font-mono text-[#9AAFA3]">
                       <span>Progress</span>
                       <span>{Math.min(discoveredMiracles.length, 3)} / 3</span>
                     </div>
                     <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
                       <div 
-                        className="h-full bg-gradient-to-r from-indigo-500 to-[#a855f7] transition-all duration-300" 
+                        className="h-full bg-gradient-to-r from-emerald-500 to-[#34D399] transition-all duration-300"
                         style={{ width: `${(Math.min(discoveredMiracles.length, 3) / 3) * 100}%` }}
                       />
                     </div>
@@ -686,16 +688,16 @@ export const GameSheets: React.FC<GameSheetsProps> = ({
 
                 <div className="p-4 rounded-xl glass-card text-left space-y-2">
                   <div className="flex justify-between items-center">
-                    <span className="text-xs font-medium text-[#f5f3ff]">Mindfulness Attunement</span>
-                    <span className="text-[10px] font-mono text-[#a855f7]">+40 Sparks</span>
+                    <span className="text-xs font-medium text-[#ECFDF5]">Mindfulness Attunement</span>
+                    <span className="text-[10px] font-mono text-[#34D399]">+40 Sparks</span>
                   </div>
-                  <p className="text-[11px] text-[#94a3b8] leading-relaxed">
+                  <p className="text-[11px] text-[#9AAFA3] leading-relaxed">
                     Perform silent alignment at the Sparkle Altar to steady the mind.
                   </p>
                   <div className="space-y-1">
-                    <div className="flex justify-between text-[9px] font-mono text-[#94a3b8]">
+                    <div className="flex justify-between text-[9px] font-mono text-[#9AAFA3]">
                       <span>Status</span>
-                      <span className="text-[#a855f7] flex items-center gap-1">
+                      <span className="text-[#34D399] flex items-center gap-1">
                         <Check className="w-3 h-3" /> Enabled
                       </span>
                     </div>
