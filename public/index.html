@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <script>
+    // The Living House is the primary product. Preserve deep-link query actions
+    // while moving the browser into the game's own PWA scope.
+    (function () {
+      var target = new URL('./game-preview/', window.location.href);
+      target.search = window.location.search;
+      target.hash = window.location.hash;
+      window.location.replace(target.href);
+    }());
+  </script>
+  <meta name="theme-color" content="#020403">
+  <!-- Entry HTML should never be cached aggressively — it carries the cache-busted main.js URL. -->
+  <meta http-equiv="cache-control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="pragma" content="no-cache">
+  <meta http-equiv="expires" content="0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="MIRACLE">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <!-- MIRACLE backend endpoint. Empty = same-origin (frontend + backend served by Express). -->
+  <meta name="miracle-api" content="">
+  <meta name="miracle-build" content="__BUILD__">
+  <link rel="manifest" href="./manifest.json">
+  <title>MIRACLE by Adwoa · faith × follow-through</title>
+  <meta name="description" content="Adwoa's mobile life operating system for faith, focus, stewardship, and follow-through.">
+
+  <!-- Open Graph (Facebook, WhatsApp, LinkedIn, iMessage) -->
+  <meta property="og:type"        content="website">
+  <meta property="og:site_name"   content="miracle">
+  <meta property="og:title"       content="MIRACLE by Adwoa · faith × follow-through">
+  <meta property="og:description" content="Adwoa's mobile life operating system for faith, focus, stewardship, and follow-through.">
+  <meta property="og:url"         content="https://miracleapp.site">
+  <meta property="og:image"       content="https://miracleapp.site/assets/og-card.png">
+  <meta property="og:image:type"  content="image/png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt"   content="miracle — personal cognitive system">
+  <meta property="og:image:secure_url" content="https://miracleapp.site/assets/og-card.png">
+
+  <!-- Twitter -->
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:title"       content="MIRACLE by Adwoa · faith × follow-through">
+  <meta name="twitter:description" content="Faith, focus, stewardship, and follow-through in one mobile life operating system.">
+  <meta name="twitter:image"       content="https://miracleapp.site/assets/og-card.png">
+  <meta name="twitter:image:alt"   content="miracle — personal cognitive system">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="./assets/favicon.svg?v=3">
+  <link rel="apple-touch-icon" sizes="180x180" href="./assets/apple-touch-icon.png?v=4">
+  <link rel="apple-touch-icon" sizes="192x192" href="./assets/icon-192.png?v=4">
+  <link rel="mask-icon" href="./assets/favicon.svg?v=3" color="#D8A84E">
+  <!-- All app stylesheets concatenated server-side, cascade order preserved. -->
+  <!-- Source files: public/styles/*.css; list lives in server.js CSS_ORDER. -->
+  <link rel="stylesheet" href="./styles/bundle.css?v=__BUILD__">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+</head>
+<body>
+  <header id="topbar"></header>
+  <main id="canvas"></main>
+  <aside id="miracle"></aside>
+  <div id="palette"></div>
+  <div id="drawer"></div>
+  <!--
+    Boot self-heal: if main.js throws a ReferenceError on load (cache poisoning —
+    old SW serving stale main.js that references browser APIs the current Safari
+    runtime doesn't have, e.g. requestIdleCallback), unregister all service workers,
+    purge caches, and hard-reload. Runs at most once per session so we don't loop.
+  -->
+  <script>
+    (function () {
+      var KEY = 'miracle_cache_heal_attempt';
+      window.addEventListener('error', function (e) {
+        var msg = (e && (e.message || e.error?.message)) || '';
+        if (!/Can't find variable|is not defined|ReferenceError/i.test(msg)) return;
+        if (sessionStorage.getItem(KEY)) return; // already tried once this session
+        sessionStorage.setItem(KEY, '1');
+        Promise.resolve()
+          .then(function () { return navigator.serviceWorker ? navigator.serviceWorker.getRegistrations() : []; })
+          .then(function (regs) { return Promise.all(regs.map(function (r) { return r.unregister(); })); })
+          .then(function () { return window.caches ? caches.keys() : []; })
+          .then(function (keys) { return Promise.all(keys.map(function (k) { return caches.delete(k); })); })
+          .finally(function () {
+            location.replace(location.pathname + '?healed=' + Date.now());
+          });
+      });
+    })();
+  </script>
+  <!-- ?v=__BUILD__ is rewritten by server.js per-deploy. Cache-bust without manual bumps. -->
+  <script type="module" src="./main.js?v=__BUILD__"></script>
+</body>
+</html>

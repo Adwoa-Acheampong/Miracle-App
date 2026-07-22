@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0F1614"/>
+      <stop offset="100%" stop-color="#050608"/>
+    </linearGradient>
+    <linearGradient id="m" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#34D399"/>
+      <stop offset="50%" stop-color="#10B981"/>
+      <stop offset="100%" stop-color="#047857"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.18" r="0.5">
+      <stop offset="0%" stop-color="rgba(52,211,153,0.35)"/>
+      <stop offset="100%" stop-color="rgba(52,211,153,0)"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="64" height="64" rx="14" fill="url(#bg)"/>
+  <rect x="0.5" y="0.5" width="63" height="63" rx="13.5" fill="none" stroke="rgba(16,185,129,0.20)"/>
+  <rect width="64" height="64" rx="14" fill="url(#glow)"/>
+
+  <!-- Proper M: bottom-left → top-left → center valley → top-right → bottom-right -->
+  <polyline points="14,48 14,18 32,38 50,18 50,48"
+            stroke="url(#m)" stroke-width="3.6"
+            stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+  <!-- Sparkle (miracle moment) above center valley -->
+  <g transform="translate(32 12)" fill="#34D399">
+    <path d="M0 -5 L1.2 -1.2 L5 0 L1.2 1.2 L0 5 L-1.2 1.2 L-5 0 L-1.2 -1.2 Z"/>
+  </g>
+  <circle cx="32" cy="12" r="1" fill="#FFFFFF" opacity="0.7"/>
+</svg>

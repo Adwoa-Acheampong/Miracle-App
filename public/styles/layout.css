@@ -1,0 +1,99 @@
+/* Top-tucked chrome · canvas-first */
+
+#topbar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: var(--topbar-h);
+  background: var(--glass-bg, rgba(10, 10, 12, 0.78));
+  backdrop-filter: var(--glass-blur, blur(20px) saturate(140%));
+  -webkit-backdrop-filter: var(--glass-blur, blur(20px) saturate(140%));
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  padding: 0 var(--sp-4);
+  z-index: 100;
+  font-size: var(--fs-sm);
+}
+#topbar::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--grad-topbar, transparent);
+  pointer-events: none;
+}
+.tb-left, .tb-right { position: relative; z-index: 1; }
+
+.tb-left  { display: flex; align-items: center; gap: var(--sp-1); color: var(--ink-1); }
+.tb-right { margin-left: auto; display: flex; align-items: center; gap: 2px; }
+
+.tb-nav {
+  background: transparent;
+  border: 0;
+  color: var(--ink-2);
+  width: 24px; height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--r-2);
+  cursor: pointer;
+  transition: background var(--motion-fast), color var(--motion-fast), transform var(--motion-fast);
+  margin-right: 2px;
+}
+.tb-nav:hover  { background: var(--bg-2); color: var(--emerald); }
+.tb-nav:active { transform: scale(0.92); }
+
+.tb-crumb {
+  cursor: pointer;
+  padding: 3px var(--sp-2);
+  border-radius: var(--r-2);
+  letter-spacing: 0.02em;
+  transition: background var(--motion-fast), color var(--motion-fast);
+}
+.tb-crumb:hover     { background: var(--bg-2); color: var(--ink-0); }
+.tb-crumb.is-active { color: var(--emerald); }
+.tb-sep             { color: var(--ink-3); }
+
+.tb-btn {
+  background: transparent;
+  border: 0;
+  color: var(--ink-2);
+  font-size: var(--fs-xs);
+  padding: 4px var(--sp-2);
+  border-radius: var(--r-2);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  letter-spacing: 0.04em;
+  transition: background var(--motion-fast), color var(--motion-fast);
+}
+.tb-btn:hover { background: var(--bg-2); color: var(--ink-0); }
+
+#canvas {
+  margin-top: var(--topbar-h);
+  padding: var(--sp-7) var(--sp-5) var(--sp-9);
+  min-height: calc(100vh - var(--topbar-h));
+}
+
+.page {
+  max-width: var(--canvas-max);
+  margin: 0 auto;
+}
+
+.page-head {
+  margin-bottom: var(--sp-7);
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-4);
+}
+.page-title {
+  font-size: var(--fs-lg);
+  font-weight: 500;
+  letter-spacing: -0.015em;
+}
+.page-meta {
+  font-size: var(--fs-xs);
+  color: var(--ink-2);
+  font-family: var(--font-mono);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}

@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0F1614"/>
+      <stop offset="100%" stop-color="#050608"/>
+    </linearGradient>
+    <linearGradient id="m" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#34D399"/>
+      <stop offset="50%" stop-color="#10B981"/>
+      <stop offset="100%" stop-color="#047857"/>
+    </linearGradient>
+    <radialGradient id="halo" cx="0.5" cy="0.18" r="0.5">
+      <stop offset="0%" stop-color="rgba(52,211,153,0.35)"/>
+      <stop offset="100%" stop-color="rgba(52,211,153,0)"/>
+    </radialGradient>
+    <radialGradient id="sparkGlow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="rgba(52,211,153,0.8)"/>
+      <stop offset="100%" stop-color="rgba(52,211,153,0)"/>
+    </radialGradient>
+    <filter id="soft">
+      <feGaussianBlur stdDeviation="6"/>
+    </filter>
+  </defs>
+
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <rect x="4" y="4" width="504" height="504" rx="108" fill="none" stroke="rgba(16,185,129,0.20)" stroke-width="2"/>
+  <rect width="512" height="512" rx="112" fill="url(#halo)"/>
+
+  <g fill="rgba(255,255,255,0.04)">
+    <circle cx="86"  cy="92"  r="2"/>
+    <circle cx="420" cy="120" r="2"/>
+    <circle cx="64"  cy="370" r="2"/>
+    <circle cx="438" cy="386" r="2"/>
+    <circle cx="128" cy="438" r="1.5"/>
+    <circle cx="370" cy="68"  r="1.5"/>
+  </g>
+
+  <circle cx="256" cy="96" r="60" fill="url(#sparkGlow)" filter="url(#soft)"/>
+
+  <!-- Proper M monogram: bottom-left → top-left → center valley → top-right → bottom-right -->
+  <polyline points="112,384 112,144 256,304 400,144 400,384"
+            stroke="url(#m)" stroke-width="30"
+            stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+  <!-- Sparkle above center valley -->
+  <g transform="translate(256 96)" fill="#34D399">
+    <path d="M0 -42 L10 -10 L42 0 L10 10 L0 42 L-10 10 L-42 0 L-10 -10 Z"/>
+  </g>
+  <circle cx="256" cy="96" r="8" fill="#FFFFFF" opacity="0.75"/>
+
+  <circle cx="196" cy="96" r="3" fill="#34D399" opacity="0.6"/>
+  <circle cx="316" cy="96" r="3" fill="#34D399" opacity="0.6"/>
+</svg>

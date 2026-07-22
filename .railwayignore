@@ -1,0 +1,6 @@
+preview/
+ui_kits/
+screenshots/
+*.md
+colors_and_type.css
+.claude/

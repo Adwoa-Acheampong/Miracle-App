@@ -1,0 +1,21 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "miracle-reminders",
+  "main": "src/index.js",
+  "workers_dev": false,
+  "compatibility_date": "2026-07-19",
+  "compatibility_flags": ["nodejs_compat"],
+  "triggers": {
+    "crons": ["*/15 * * * *"]
+  },
+  "vars": {
+    "VAPID_SUBJECT": "mailto:support@miracleapp.site"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "miracle-db",
+      "database_id": "329f8c5b-9327-417d-82c0-dc9a45871c77"
+    }
+  ]
+}

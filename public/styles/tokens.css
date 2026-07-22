@@ -1,0 +1,80 @@
+/* Hobonichi-Adwoa · design tokens
+   Aesthetic: Claude-desktop minimalism · emerald + ruby · small type · generous space */
+
+:root {
+  /* Surface — near-black, low chroma */
+  --bg-0: #0A0A0C;
+  --bg-1: #111114;
+  --bg-2: #16161B;
+  --bg-3: #1C1C22;
+  --line: rgba(255, 255, 255, 0.06);
+  --line-strong: rgba(255, 255, 255, 0.1);
+
+  /* Ink — warm off-white scale */
+  --ink-0: #E8E6E1;
+  --ink-1: #A8A6A0;
+  --ink-2: #6E6C66;
+  --ink-3: #4A4A45;
+
+  /* Accents — emerald (primary) + ruby (alert/secondary) */
+  --emerald:      #10B981;
+  --emerald-deep: #047857;
+  --emerald-glow: rgba(16, 185, 129, 0.14);
+
+  --ruby:         #E11D48;
+  --ruby-deep:    #BE123C;
+  --ruby-glow:    rgba(225, 29, 72, 0.14);
+
+  /* Semantic */
+  --ok:   var(--emerald);
+  --bad:  var(--ruby);
+  --warn: #D4A24E;
+
+  /* Extended accent palette (Part A) */
+  --color-emerald:  #10B981;
+  --color-sapphire: #4A7FA5;   /* cool blue — scripture, prayer, faith data */
+  --color-clay:     #B5674D;   /* warm terracotta — finance, stewardship, earth */
+  --color-violet:   #7B5EA7;   /* deep purple — dreams, ideas, creative/prophetic */
+  --color-gold:     #D4A24E;
+  --color-ruby:     #C0392B;
+  --color-amber:    #F59E0B;
+
+  /* Type scale — small by design */
+  --fs-xs:   10px;
+  --fs-sm:   11px;
+  --fs-base: 11px;   /* extremely small body */
+  --fs-md:   13px;
+  --fs-lg:   15px;
+  --fs-xl:   18px;
+  --fs-hero: 24px;
+
+  /* Type families */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  /* Space scale */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+  --sp-7: 48px;
+  --sp-8: 64px;
+  --sp-9: 96px;
+
+  /* Radii */
+  --r-1: 2px;
+  --r-2: 4px;
+  --r-3: 8px;
+  --r-4: 12px;
+
+  /* Motion */
+  --motion-fast: 120ms cubic-bezier(0.4, 0, 0.2, 1);
+  --motion-med:  220ms cubic-bezier(0.4, 0, 0.2, 1);
+  --motion-slow: 360ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Layout */
+  --topbar-h:  40px;
+  --canvas-max: 760px;
+}

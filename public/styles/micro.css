@@ -1,0 +1,268 @@
+/* MODULE 6 — Micro-Interaction System + MODULE 7 — Skeleton Loaders */
+
+/* ═══ 1. STAT TILE HOVER ═══ */
+
+.score-tile {
+  transition: transform 180ms cubic-bezier(0.4, 0, 0.2, 1),
+              border-color 180ms ease,
+              box-shadow 180ms ease;
+}
+.score-tile:hover {
+  transform: translateY(-2px);
+  border-color: var(--dom, var(--emerald));
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3), 0 0 0 1px var(--dom, var(--emerald-glow));
+}
+
+/* ═══ 2. RIPPLE ON + NEW BUTTON ═══ */
+
+.btn.is-primary {
+  position: relative;
+  overflow: hidden;
+}
+.btn.is-primary .ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.20);
+  transform: scale(0);
+  animation: rippleExpand 400ms ease-out forwards;
+  pointer-events: none;
+}
+@keyframes rippleExpand {
+  to { transform: scale(4); opacity: 0; }
+}
+
+/* ═══ 3. HEATMAP CELL HOVER TOOLTIP ═══ */
+
+.hm-cell {
+  position: relative;
+  cursor: pointer;
+}
+.hm-cell::after {
+  content: attr(title);
+  position: absolute;
+  bottom: calc(100% + 4px);
+  left: 50%;
+  transform: translateX(-50%) scale(0.8);
+  background: var(--bg-3);
+  color: var(--ink-1);
+  font-size: 9px;
+  font-family: var(--font-mono);
+  padding: 2px 6px;
+  border-radius: 3px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 150ms ease, transform 150ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  z-index: 10;
+}
+.hm-cell:hover::after {
+  opacity: 1;
+  transform: translateX(-50%) scale(1);
+}
+
+/* ═══ 4. NAV BREADCRUMB — handled in motion.css stagger ═══ */
+
+/* ═══ 5. SCORE BAR SEGMENT FILL ═══ */
+
+.fti-comp-bar span {
+  transform-origin: left;
+  animation: fillWidth 500ms cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+.fti-components > :nth-child(1) .fti-comp-bar span { animation-delay: 0ms; }
+.fti-components > :nth-child(2) .fti-comp-bar span { animation-delay: 50ms; }
+.fti-components > :nth-child(3) .fti-comp-bar span { animation-delay: 100ms; }
+.fti-components > :nth-child(4) .fti-comp-bar span { animation-delay: 150ms; }
+.fti-components > :nth-child(5) .fti-comp-bar span { animation-delay: 200ms; }
+
+/* ═══ 6. JUMP PALETTE — results stagger + highlight sweep ═══ */
+
+.palette-results .palette-item {
+  animation: fadeUp 180ms cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+.palette-results > :nth-child(1) { animation-delay: 0ms; }
+.palette-results > :nth-child(2) { animation-delay: 30ms; }
+.palette-results > :nth-child(3) { animation-delay: 60ms; }
+.palette-results > :nth-child(4) { animation-delay: 90ms; }
+.palette-results > :nth-child(5) { animation-delay: 120ms; }
+.palette-results > :nth-child(6) { animation-delay: 150ms; }
+.palette-results > :nth-child(7) { animation-delay: 180ms; }
+
+.palette-item.is-focused {
+  background: linear-gradient(90deg, var(--emerald-glow), transparent);
+  background-size: 200% 100%;
+  animation: highlightSweep 600ms ease forwards;
+}
+@keyframes highlightSweep {
+  from { background-position: 100% 0; }
+  to   { background-position: 0% 0; }
+}
+
+/* ═══ 7. CSS COUNTER ANIMATION (domain card count) — needs JS --target-count ═══ */
+
+/* ═══ 8. SETTINGS TOGGLE SWITCH ═══ */
+
+.toggle {
+  position: relative;
+  width: 36px;
+  height: 20px;
+  background: var(--bg-3);
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  cursor: pointer;
+  transition: background 180ms ease;
+}
+.toggle::after {
+  content: '';
+  position: absolute;
+  top: 2px; left: 2px;
+  width: 14px; height: 14px;
+  background: var(--ink-2);
+  border-radius: 50%;
+  transition: transform 180ms cubic-bezier(0.4, 0, 0.2, 1),
+              background 180ms ease;
+}
+.toggle.is-on {
+  background: var(--emerald-glow);
+  border-color: var(--emerald);
+}
+.toggle.is-on::after {
+  transform: translateX(16px);
+  background: var(--emerald);
+}
+
+/* ═══ 9. ENTRY SAVE — collapse + checkmark ═══ */
+
+.save-exit {
+  animation: fadeOut 200ms ease forwards;
+}
+.save-success {
+  animation: fadeUp 300ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--emerald);
+  font-size: var(--fs-sm);
+}
+.save-success svg {
+  stroke-dasharray: 24;
+  stroke-dashoffset: 24;
+  animation: checkDraw 400ms ease 100ms forwards;
+}
+
+/* ═══ 10. STREAK BADGE PULSE ═══ */
+
+.streak-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--fs-xs);
+  font-family: var(--font-mono);
+  color: var(--dom, var(--emerald));
+  animation: pulseScale 5s ease-in-out infinite;
+}
+.streak-badge .fire {
+  animation: fireFlicker 1.5s ease-in-out infinite;
+  display: inline-block;
+}
+
+/* ═══ MODULE 7 — SKELETON LOADERS ═══ */
+
+.skeleton {
+  background: var(--bg-2);
+  border-radius: var(--r-3);
+  position: relative;
+  overflow: hidden;
+}
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255,255,255,0.03) 40%,
+    rgba(255,255,255,0.06) 50%,
+    rgba(255,255,255,0.03) 60%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s linear infinite;
+}
+
+.skeleton-row {
+  height: 48px;
+  margin-bottom: 4px;
+}
+.skeleton-card {
+  height: 88px;
+  margin-bottom: 8px;
+}
+.skeleton-kpi {
+  height: 100px;
+}
+.skeleton-heatmap {
+  height: 80px;
+  width: 100%;
+}
+.skeleton-text {
+  height: 12px;
+  width: 60%;
+  margin-bottom: 8px;
+  border-radius: 2px;
+}
+.skeleton-text.short { width: 35%; }
+.skeleton-text.long  { width: 85%; }
+
+.skeleton-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 8px;
+}
+
+/* Crossfade from skeleton to real content */
+.skeleton-active {
+  opacity: 1;
+  transition: opacity 200ms ease;
+}
+.skeleton-done {
+  opacity: 0;
+  position: absolute;
+  pointer-events: none;
+}
+.content-revealed {
+  animation: fadeUp 220ms cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+/* ═══ EMPTY STATE ═══ */
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--sp-8) var(--sp-5);
+  text-align: center;
+  animation: fadeUp 400ms cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+.empty-state-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--dom-mist, var(--emerald-mist, rgba(16,185,129,0.06)));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--sp-4);
+  color: var(--dom, var(--emerald));
+  font-size: 24px;
+}
+.empty-state-title {
+  font-size: var(--fs-md);
+  color: var(--ink-1);
+  margin-bottom: var(--sp-2);
+}
+.empty-state-hint {
+  font-size: var(--fs-xs);
+  color: var(--ink-2);
+  font-family: var(--font-mono);
+}

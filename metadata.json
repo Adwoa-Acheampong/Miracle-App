@@ -1,6 +1,0 @@
-{
-  "name": "Miracle: The Living House",
-  "description": "A contemplative full-screen life game built with frosted glass, obsidian architecture, emerald light, responsive sound, and meaningful daily reflection.",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}
