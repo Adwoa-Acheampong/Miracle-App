@@ -103,3 +103,58 @@ test('Bible goals expose catch-up portions and count only fully completed days',
   assert.equal(countCompletedPlanDays(plan), 1);
   assert.equal(selectCurrentPlanPortion(plan, '2026-07-03')?.day, 2);
 });
+
+test('focus garden supports timed and untimed covenants with linked reflections', async () => {
+  const [index, ui, data] = await Promise.all([
+    readFile(new URL('public/game-preview/index.html', root), 'utf8'),
+    readFile(new URL('public/game-preview/house-ui.js', root), 'utf8'),
+    readFile(new URL('public/game-preview/data.js', root), 'utf8'),
+  ]);
+  assert.match(index, /data-focus-minutes="0"/);
+  assert.match(index, /data-focus-minutes="60"/);
+  assert.match(index, /id="focus-achievement"/);
+  assert.match(index, /id="focus-benchmark"/);
+  for (const type of ['task', 'project', 'prayer', 'scripture', 'book']) {
+    assert.match(index, new RegExp(`<option value="${type}">`));
+  }
+  assert.match(ui, /mode === 'untimed'/);
+  assert.match(ui, /prepareFocusCompletion\(true\)/);
+  assert.match(ui, /renderLinkedFocusLog\(record\)/);
+  assert.match(data, /appendFocusToLinkedRecord/);
+  assert.match(data, /focusSecondsTotal/);
+  assert.match(data, /latestFocusAchievement/);
+});
+
+test('focus rewards are dimensional, botanically annotated, and stream the curated stations privately', async () => {
+  const [index, focusGarden, serviceWorker] = await Promise.all([
+    readFile(new URL('public/game-preview/index.html', root), 'utf8'),
+    readFile(new URL('public/game-preview/focus-garden.js', root), 'utf8'),
+    readFile(new URL('public/game-preview/sw.js', root), 'utf8'),
+  ]);
+  assert.match(index, /MvPgu-hwYQw/);
+  assert.match(index, /P-XnYn3FUq4/);
+  assert.match(focusGarden, /scientificName/);
+  assert.match(focusGarden, /new THREE\.CylinderGeometry/);
+  assert.match(focusGarden, /new THREE\.SphereGeometry/);
+  assert.match(focusGarden, /reward\.id === 'emmaus-road'/);
+  assert.match(serviceWorker, /focus-garden\.js\?v=__BUILD__/);
+});
+
+test('main garden has real geometry, earned focus blooms, grass, and an animated waterfall', async () => {
+  const game = await readFile(new URL('public/game-preview/game.js', root), 'utf8');
+  assert.match(game, /createDimensionalFlower/);
+  assert.match(game, /new THREE\.InstancedMesh\(new THREE\.PlaneGeometry\(0\.075, 0\.48\)/);
+  assert.match(game, /const waterfall = new THREE\.Group/);
+  assert.match(game, /dropletGeometry\.attributes\.position\.needsUpdate = true/);
+  assert.match(game, /state\.focusBlooms/);
+});
+
+test('Moji can be called from the sanctuary HUD even when passive cameos are off', async () => {
+  const [index, ui] = await Promise.all([
+    readFile(new URL('public/game-preview/index.html', root), 'utf8'),
+    readFile(new URL('public/game-preview/house-ui.js', root), 'utf8'),
+  ]);
+  assert.match(index, /id="moji-button"/);
+  assert.match(ui, /showMoji\('wave'.*\{ force: true \}/s);
+  assert.match(ui, /async function showMoji\(action, message, \{ force = false \} = \{\}\)/);
+});

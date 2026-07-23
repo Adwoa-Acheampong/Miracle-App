@@ -1254,6 +1254,31 @@ function buildGardenRoom(group, wallMaterial, trimMaterial) {
   ground.rotation.x = -Math.PI / 2;
   ground.position.z = -0.6;
   group.add(ground);
+
+  const grassMaterial = new THREE.MeshStandardMaterial({
+    color: 0x0b6847,
+    emissive: 0x042d20,
+    emissiveIntensity: 0.18,
+    roughness: 0.9,
+    side: THREE.DoubleSide,
+  });
+  const grass = new THREE.InstancedMesh(new THREE.PlaneGeometry(0.075, 0.48), grassMaterial, 260);
+  const grassBlade = new THREE.Object3D();
+  for (let index = 0; index < grass.count; index += 1) {
+    const lane = index % 26;
+    const row = Math.floor(index / 26);
+    const x = -6.7 + lane * 0.53 + Math.sin(index * 2.7) * 0.18;
+    const z = -5.8 + row * 1.18 + Math.cos(index * 1.9) * 0.23;
+    grassBlade.position.set(x, 0.22, z);
+    grassBlade.rotation.y = (index * 1.618) % Math.PI;
+    grassBlade.rotation.z = Math.sin(index) * 0.13;
+    grassBlade.scale.set(0.75 + (index % 4) * 0.12, 0.7 + (index % 5) * 0.09, 1);
+    grassBlade.updateMatrix();
+    grass.setMatrixAt(index, grassBlade.matrix);
+  }
+  grass.instanceMatrix.needsUpdate = true;
+  group.add(grass);
+
   const pathMaterial = new THREE.MeshStandardMaterial({ color: 0x071d15, roughness: 0.9 });
   for (let i = 0; i < 8; i += 1) {
     const stone = new THREE.Mesh(new THREE.BoxGeometry(1.5 + (i % 2) * 0.2, 0.08, 1.15, 1, 1, 1), pathMaterial);
@@ -1261,7 +1286,15 @@ function buildGardenRoom(group, wallMaterial, trimMaterial) {
     stone.rotation.y = Math.sin(i) * 0.16;
     group.add(stone);
   }
+
   const plantGroups = [];
+  const bedFlowers = [];
+  const flowerPalettes = [
+    [0xf4fff9, 0xdaf8eb, 0xd7b56d],
+    [0xc43c69, 0xf27f9d, 0x2b171e],
+    [0xffd9e5, 0xfff5f8, 0xd9b36c],
+    [0xfff1b8, 0xf9fbdd, 0xa5bd58],
+  ];
   for (const [bedIndex, x] of [-3.5, 3.5].entries()) {
     for (let row = 0; row < 2; row += 1) {
       const z = 1.4 - row * 4.1;
@@ -1272,25 +1305,17 @@ function buildGardenRoom(group, wallMaterial, trimMaterial) {
       plants.position.set(x, 0.32, z);
       group.add(plants);
       for (let p = 0; p < 5; p += 1) {
-        const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.055, 0.8, 8), trimMaterial.clone());
-        stem.position.set(-1.05 + (p % 3) * 1.02, 0.4, -0.72 + Math.floor(p / 3) * 1.42);
-        plants.add(stem);
-        const leafMaterial = new THREE.MeshStandardMaterial({ color: bedIndex ? 0x0a8a62 : 0x087a58, emissive: 0x075f44, emissiveIntensity: 0.18, roughness: 0.7 });
-        for (const side of [-1, 1]) {
-          const leaf = new THREE.Mesh(new THREE.SphereGeometry(0.2, 8, 6), leafMaterial);
-          leaf.scale.set(1.55, 0.48, 0.78);
-          leaf.rotation.z = side * 0.52;
-          leaf.position.copy(stem.position).add(new THREE.Vector3(side * 0.17, 0.45, 0));
-          plants.add(leaf);
-        }
-        const bud = new THREE.Mesh(new THREE.OctahedronGeometry(0.13, 0), trimMaterial.clone());
-        bud.position.copy(stem.position).add(new THREE.Vector3(0, 0.86, 0));
-        plants.add(bud);
+        const flower = createDimensionalFlower(flowerPalettes[(bedIndex * 2 + row + p) % flowerPalettes.length], 0.68 + (p % 3) * 0.08);
+        flower.group.position.set(-1.05 + (p % 3) * 1.02, 0, -0.72 + Math.floor(p / 3) * 1.42);
+        flower.group.rotation.y = p * 1.7;
+        plants.add(flower.group);
+        bedFlowers.push(flower);
       }
       plants.scale.y = 0.38;
       plantGroups.push(plants);
     }
   }
+
   for (const x of [-6.2, 6.2]) {
     const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.45, 3.4, 10), wallMaterial.clone());
     trunk.position.set(x, 1.7, -3.7);
@@ -1302,48 +1327,174 @@ function buildGardenRoom(group, wallMaterial, trimMaterial) {
       group.add(crown);
     }
   }
+
+  const waterfall = new THREE.Group();
+  waterfall.position.set(0, 0, -6.35);
+  group.add(waterfall);
+  const rockMaterial = new THREE.MeshStandardMaterial({ color: 0x071a14, roughness: 0.86, metalness: 0.08 });
+  for (let index = 0; index < 18; index += 1) {
+    const rock = new THREE.Mesh(new THREE.DodecahedronGeometry(0.58 + (index % 4) * 0.1, 0), rockMaterial.clone());
+    const side = index % 2 ? 1 : -1;
+    rock.position.set(side * (0.82 + (index % 3) * 0.27), 0.38 + Math.floor(index / 6) * 1.12 + (index % 3) * 0.18, -0.12 + Math.sin(index) * 0.16);
+    rock.scale.set(1.25, 0.86, 0.75);
+    rock.rotation.set(index * 0.31, index * 0.57, index * 0.22);
+    waterfall.add(rock);
+  }
+  const fallMaterial = new THREE.MeshPhysicalMaterial({
+    color: 0x54d8b1,
+    emissive: 0x087a58,
+    emissiveIntensity: 0.42,
+    transparent: true,
+    opacity: 0.58,
+    roughness: 0.12,
+    transmission: 0.18,
+    depthWrite: false,
+    side: THREE.DoubleSide,
+  });
+  const fall = new THREE.Mesh(new THREE.PlaneGeometry(1.45, 3.45, 8, 20), fallMaterial);
+  fall.position.set(0, 2.25, 0.24);
+  waterfall.add(fall);
+  const pool = new THREE.Mesh(
+    new THREE.CircleGeometry(2.25, 56),
+    new THREE.MeshPhysicalMaterial({ color: 0x087a68, emissive: 0x064f40, emissiveIntensity: 0.34, transparent: true, opacity: 0.68, roughness: 0.16, transmission: 0.2 }),
+  );
+  pool.rotation.x = -Math.PI / 2;
+  pool.position.set(0, 0.08, 0.82);
+  waterfall.add(pool);
+  const foam = [0.5, 0.86, 1.24].map((radius, index) => {
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(radius, 0.025, 8, 48), new THREE.MeshBasicMaterial({ color: 0xc8ffec, transparent: true, opacity: 0.26 - index * 0.04 }));
+    ring.rotation.x = Math.PI / 2;
+    ring.position.set(0, 0.13 + index * 0.006, 0.7);
+    waterfall.add(ring);
+    return ring;
+  });
+  const dropletPositions = new Float32Array(90 * 3);
+  for (let index = 0; index < 90; index += 1) {
+    dropletPositions[index * 3] = (Math.sin(index * 7.3) * 0.68);
+    dropletPositions[index * 3 + 1] = 0.35 + ((index * 0.47) % 3.8);
+    dropletPositions[index * 3 + 2] = 0.35 + Math.cos(index * 2.1) * 0.2;
+  }
+  const dropletGeometry = new THREE.BufferGeometry();
+  dropletGeometry.setAttribute('position', new THREE.BufferAttribute(dropletPositions, 3));
+  const droplets = new THREE.Points(dropletGeometry, new THREE.PointsMaterial({ color: 0xc5ffed, size: 0.055, transparent: true, opacity: 0.7, depthWrite: false }));
+  waterfall.add(droplets);
+
   const trellisMaterial = trimMaterial.clone();
-  for (const x of [-3.8, -1.9, 0, 1.9, 3.8]) {
+  for (const x of [-5.4, -3.9, 3.9, 5.4]) {
     const post = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.065, 4.2, 8), trellisMaterial);
     post.position.set(x, 2.1, -6.75);
     group.add(post);
   }
   for (const y of [1.2, 2.25, 3.3, 4.2]) {
-    const vine = new THREE.Mesh(new THREE.BoxGeometry(8.4, 0.045, 0.05), trellisMaterial);
-    vine.position.set(0, y, -6.72);
-    group.add(vine);
+    for (const x of [-4.65, 4.65]) {
+      const vine = new THREE.Mesh(new THREE.BoxGeometry(1.55, 0.045, 0.05), trellisMaterial);
+      vine.position.set(x, y, -6.72);
+      group.add(vine);
+    }
   }
   const vineLeafMaterial = new THREE.MeshStandardMaterial({ color: 0x087a58, emissive: 0x043d2a, emissiveIntensity: 0.22, roughness: 0.74 });
   for (let index = 0; index < 18; index += 1) {
     const leaf = new THREE.Mesh(new THREE.SphereGeometry(0.2, 8, 6), vineLeafMaterial);
     leaf.scale.set(1.7, 0.55, 0.7);
     leaf.rotation.z = (index % 2 ? 1 : -1) * 0.46;
-    leaf.position.set(-3.75 + (index % 6) * 1.5, 1.15 + Math.floor(index / 6) * 1.25, -6.63);
+    const side = index % 2 ? 1 : -1;
+    leaf.position.set(side * (3.9 + (index % 3) * 0.7), 1.15 + Math.floor(index / 6) * 1.25, -6.63);
     group.add(leaf);
   }
-  const gardenGlow = new THREE.Mesh(new THREE.PlaneGeometry(8.1, 3.75), new THREE.MeshBasicMaterial({ color: 0x0a8a62, transparent: true, opacity: 0.055, depthWrite: false }));
-  gardenGlow.position.set(0, 2.35, -6.8);
+
+  const gardenGlow = new THREE.Mesh(new THREE.PlaneGeometry(10.4, 4.6), new THREE.MeshBasicMaterial({ color: 0x0a8a62, transparent: true, opacity: 0.045, depthWrite: false }));
+  gardenGlow.position.set(0, 2.5, -6.9);
   group.add(gardenGlow);
   const waterChannel = new THREE.Mesh(new THREE.PlaneGeometry(0.48, 13.2), new THREE.MeshBasicMaterial({ color: 0x20c58d, transparent: true, opacity: 0.34 }));
   waterChannel.rotation.x = -Math.PI / 2;
   waterChannel.position.set(0, 0.065, -0.3);
   group.add(waterChannel);
+
+  const focusFlowers = [];
+  for (let index = 0; index < 16; index += 1) {
+    const flower = createDimensionalFlower(flowerPalettes[index % flowerPalettes.length], 0.54 + (index % 4) * 0.05);
+    const side = index % 2 ? 1 : -1;
+    flower.group.position.set(side * (1.1 + (index % 4) * 0.46), 0.12, 3.55 - Math.floor(index / 4) * 0.64);
+    flower.group.rotation.y = index * 1.33;
+    flower.group.visible = false;
+    group.add(flower.group);
+    focusFlowers.push(flower);
+  }
+
   const halo = makeRoomHalo(group, 0x25cf93, new THREE.Vector3(0, 3.1, -7.25), 4.2);
   const light = new THREE.HemisphereLight(0x75dcb5, 0x020604, 2.2);
   group.add(light);
   const growth = new THREE.Group();
   plantGroups.forEach(item => growth.add(item));
+  focusFlowers.forEach(item => growth.add(item.group));
   group.add(growth);
   return {
     halo, orbit: new THREE.Group(), growth, light,
     applyState(state) {
       const scale = 0.38 + Math.min(0.62, Number(state.count || 0) / 22);
       plantGroups.forEach((plants, index) => { plants.scale.y = Math.max(0.34, scale - index * 0.035); });
+      const earned = Math.min(focusFlowers.length, Number(state.focusBlooms || 0) + Number(state.focusScenes || 0));
+      focusFlowers.forEach((flower, index) => {
+        flower.group.visible = index < earned;
+        flower.group.scale.setScalar(index < earned ? 1 : 0.01);
+      });
     },
-    tick(time) { plantGroups.forEach((plants, index) => { plants.rotation.z = Math.sin(time * 0.0007 + index) * 0.018; }); },
+    tick(time) {
+      plantGroups.forEach((plants, index) => { plants.rotation.z = Math.sin(time * 0.0007 + index) * 0.018; });
+      bedFlowers.forEach((flower, index) => { flower.bloom.rotation.z = Math.sin(time * 0.0008 + index) * 0.035; });
+      focusFlowers.forEach((flower, index) => { flower.bloom.rotation.y = Math.sin(time * 0.0005 + index) * 0.1; });
+      fallMaterial.opacity = 0.52 + Math.sin(time * 0.0022) * 0.08;
+      foam.forEach((ring, index) => {
+        const wave = 0.92 + ((time * 0.00018 + index * 0.21) % 0.45);
+        ring.scale.setScalar(wave);
+        ring.material.opacity = Math.max(0.05, 0.34 - (wave - 0.92) * 0.55);
+      });
+      const positions = dropletGeometry.attributes.position.array;
+      for (let index = 0; index < positions.length / 3; index += 1) {
+        positions[index * 3 + 1] -= 0.022 + (index % 5) * 0.002;
+        if (positions[index * 3 + 1] < 0.25) positions[index * 3 + 1] = 4.1;
+      }
+      dropletGeometry.attributes.position.needsUpdate = true;
+    },
     cameraOffset: new THREE.Vector3(0, 2.75, 9.2),
     targetOffset: new THREE.Vector3(0, 1.5, -2.2),
   };
+}
+
+function createDimensionalFlower(palette = [0xf4fff9, 0xdaf8eb, 0xd7b56d], scale = 1) {
+  const group = new THREE.Group();
+  group.scale.setScalar(scale);
+  const stemMaterial = new THREE.MeshStandardMaterial({ color: 0x0c7953, emissive: 0x043c2a, emissiveIntensity: 0.16, roughness: 0.72 });
+  const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.055, 1.1, 9), stemMaterial);
+  stem.position.y = 0.55;
+  group.add(stem);
+  for (const side of [-1, 1]) {
+    const leaf = new THREE.Mesh(new THREE.SphereGeometry(0.16, 12, 8), stemMaterial.clone());
+    leaf.scale.set(1.65, 0.34, 0.7);
+    leaf.rotation.z = side * 0.58;
+    leaf.position.set(side * 0.16, 0.48 + (side > 0 ? 0.18 : 0), 0);
+    group.add(leaf);
+  }
+  const bloom = new THREE.Group();
+  bloom.position.y = 1.13;
+  group.add(bloom);
+  for (let index = 0; index < 7; index += 1) {
+    const angle = (index / 7) * Math.PI * 2;
+    const petal = new THREE.Mesh(
+      new THREE.SphereGeometry(0.19, 14, 9),
+      new THREE.MeshPhysicalMaterial({ color: palette[index % 2], roughness: 0.38, clearcoat: 0.12 }),
+    );
+    petal.scale.set(0.72, 1.36, 0.32);
+    petal.position.set(Math.cos(angle) * 0.2, Math.sin(angle) * 0.13, Math.sin(angle) * 0.06);
+    petal.rotation.z = angle - Math.PI / 2;
+    petal.rotation.x = 0.52;
+    bloom.add(petal);
+  }
+  bloom.add(new THREE.Mesh(
+    new THREE.SphereGeometry(0.11, 14, 10),
+    new THREE.MeshStandardMaterial({ color: palette[2], emissive: palette[2], emissiveIntensity: 0.2, roughness: 0.55 }),
+  ));
+  return { group, bloom };
 }
 
 function buildArchiveRoom(group, wallMaterial, trimMaterial) {
@@ -1995,9 +2146,10 @@ class Soundscape {
     this.tone(138.59, 0.12, 0.3, 0.035);
   }
 
-  focus(active) {
-    if (!this.context || this.muted || !this.streamGain) return;
-    this.streamGain.gain.setTargetAtTime(active ? 0.31 : 0.23, this.context.currentTime, 0.22);
+  focus(active, rain = true) {
+    if (!this.context || !this.streamGain) return;
+    const level = active ? (rain ? 0.31 : 0.0001) : 0.23;
+    this.streamGain.gain.setTargetAtTime(level, this.context.currentTime, 0.22);
   }
 
   tone(frequency, delay, duration, volume) {

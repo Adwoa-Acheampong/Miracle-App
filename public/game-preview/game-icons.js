@@ -35,6 +35,7 @@ const EXTRA = Object.freeze({
   'bell-off': '<path d="m2 2 20 20"/><path d="M13.7 21h-3.4"/><path d="M6.3 6.3A6 6 0 0 0 6 8c0 7-3 7-3 9h14"/><path d="M18 12.7V8a6 6 0 0 0-8.6-5.4"/>',
   'triangle-alert': '<path d="M10.3 2.9 1.8 17a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 2.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4"/><path d="M12 17h.01"/>',
   'circle-alert': '<circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/>',
+  'cloud-rain': '<path d="M20.5 14.5A4.5 4.5 0 0 0 16 10a6 6 0 0 0-11.6 2A4 4 0 0 0 5 20h14a3.5 3.5 0 0 0 1.5-5.5Z"/><path d="M8 20v2M12 20v2M16 20v2"/>',
 });
 
 export function icon(name, { size = 14, stroke = 1.6 } = {}) {

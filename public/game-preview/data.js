@@ -400,6 +400,11 @@ export async function projectHouseState() {
       progress: growthProgress(count),
     };
   }
+  const focusSessions = await all('focusSessions').catch(() => []);
+  const completedFocus = focusSessions.filter(row => row.status === 'completed');
+  rooms.garden.focusBlooms = completedFocus.filter(row => row.reward?.kind === 'flower').length;
+  rooms.garden.focusScenes = completedFocus.filter(row => row.reward?.kind === 'scene').length;
+  rooms.garden.focusRewards = completedFocus.map(row => row.reward).filter(Boolean).slice(-24);
   const sparks = (await all('miracleLog').catch(() => [])).filter(row => row.active !== false);
   const signs = sparks.filter(row => row.kind === 'sign');
   return { rooms, sparks: sparks.length, signs, records: Object.values(rooms).reduce((sum, room) => sum + room.count, 0) };
@@ -426,20 +431,107 @@ export async function completeTask(id, completed = true) {
   return saved;
 }
 
-export async function saveFocusSession({ taskLabel, minutes, elapsedSecs, status, notes = '' }) {
+const FOCUS_LINK_STORES = Object.freeze({
+  task: 'tasks',
+  project: 'projects',
+  prayer: 'prayers',
+  scripture: 'bible',
+  book: 'books',
+});
+
+export async function getFocusDashboard() {
+  const sessions = (await all('focusSessions').catch(() => []))
+    .sort((a, b) => String(b.endedAt || b.updatedAt || '').localeCompare(String(a.endedAt || a.updatedAt || '')));
+  const today = todayKey();
+  const weekStart = new Date();
+  weekStart.setHours(0, 0, 0, 0);
+  weekStart.setDate(weekStart.getDate() - ((weekStart.getDay() + 6) % 7));
+  const completed = sessions.filter(row => row.status === 'completed');
+  const secondsFor = rows => rows.reduce((sum, row) => sum + Math.max(0, Number(row.elapsedSecs || 0)), 0);
+  const todaySessions = sessions.filter(row => String(row.endedAt || row.updatedAt || '').startsWith(today));
+  const weekSessions = sessions.filter(row => new Date(row.endedAt || row.updatedAt || 0) >= weekStart);
+  const daily = Object.values(sessions.reduce((days, row) => {
+    const date = String(row.endedAt || row.updatedAt || '').slice(0, 10);
+    if (!date) return days;
+    days[date] ||= { date, seconds: 0, sessions: 0, completed: 0 };
+    days[date].seconds += Math.max(0, Number(row.elapsedSecs || 0));
+    days[date].sessions += 1;
+    if (row.status === 'completed') days[date].completed += 1;
+    return days;
+  }, {})).sort((a, b) => b.date.localeCompare(a.date));
+  return {
+    sessions,
+    daily,
+    todaySeconds: secondsFor(todaySessions),
+    weekSeconds: secondsFor(weekSessions),
+    lifetimeSeconds: secondsFor(sessions),
+    completedCount: completed.length,
+    bloomCount: completed.filter(row => row.reward?.kind === 'flower').length,
+    sceneCount: completed.filter(row => row.reward?.kind === 'scene').length,
+    quoteCount: completed.filter(row => row.reward?.kind === 'quote').length,
+    rewardCount: completed.filter(row => !!row.reward).length,
+    completionRate: sessions.length ? Math.round((completed.length / sessions.length) * 100) : 0,
+  };
+}
+
+export async function listFocusTargets() {
+  const groups = [];
+  for (const [type, store] of Object.entries(FOCUS_LINK_STORES)) {
+    const rows = await all(store).catch(() => []);
+    groups.push({
+      type,
+      store,
+      label: ({ task: 'Tasks', project: 'Projects', prayer: 'Prayers', scripture: 'Scripture', book: 'Books' })[type],
+      items: rows
+        .map(row => ({
+          id: keyFor(store, row),
+          label: focusTargetLabel(type, row),
+          meta: focusTargetMeta(type, row),
+        }))
+        .sort((a, b) => a.label.localeCompare(b.label))
+        .slice(0, 80),
+    });
+  }
+  return groups;
+}
+
+export async function saveFocusSession({
+  taskLabel,
+  minutes,
+  elapsedSecs,
+  status,
+  mode = 'timed',
+  linkType = 'general',
+  linkId = '',
+  achievement = '',
+  milestone = '',
+  benchmarkPercent = null,
+  reward = null,
+  soundMode = 'rain',
+  notes = '',
+}) {
   const saved = await put('focusSessions', {
     id: ulid(),
-    taskId: null,
+    taskId: linkType === 'task' ? linkId || null : null,
     taskLabel: String(taskLabel || '').trim(),
-    mode: 'deep',
+    mode,
     durationMins: Number(minutes),
     elapsedSecs: Number(elapsedSecs),
     status,
+    linkType,
+    linkStore: FOCUS_LINK_STORES[linkType] || null,
+    linkId: String(linkId || ''),
+    achievement: String(achievement || '').trim(),
+    milestone: String(milestone || '').trim(),
+    benchmarkPercent: benchmarkPercent === '' || benchmarkPercent == null ? null : Math.max(0, Math.min(100, Number(benchmarkPercent))),
+    reward,
+    soundMode,
     startedAt: new Date(Date.now() - Number(elapsedSecs) * 1000).toISOString(),
     endedAt: new Date().toISOString(),
     notes,
     xp: 0,
   });
+  await appendFocusToLinkedRecord(saved);
   await recordSpark({ kind: 'focus-session', room: 'workshop', feature: 'focus', sourceStore: 'focusSessions', sourceId: saved.id, label: status === 'completed' ? 'Deep work completed' : 'Focus honestly recorded' });
   if (status === 'completed') {
     await maybeAwardSign('deep-well', 'Deep Well', 'workshop', 3, async () => {
@@ -448,6 +540,49 @@ export async function saveFocusSession({ taskLabel, minutes, elapsedSecs, status
     }, 'Three completed focus chambers deepened the Workshop.');
   }
   return saved;
+}
+
+async function appendFocusToLinkedRecord(session) {
+  const store = session.linkStore;
+  if (!store || !session.linkId) return;
+  const record = await get(store, session.linkId);
+  if (!record) return;
+  const focusLog = Array.isArray(record.focusLog) ? record.focusLog.slice(-99) : [];
+  focusLog.push({
+    sessionId: session.id,
+    at: session.endedAt,
+    elapsedSecs: session.elapsedSecs,
+    status: session.status,
+    achievement: session.achievement,
+    milestone: session.milestone,
+    benchmarkPercent: session.benchmarkPercent,
+    reward: session.reward?.name || '',
+  });
+  await put(store, {
+    ...record,
+    focusLog,
+    focusSecondsTotal: Math.max(0, Number(record.focusSecondsTotal || 0)) + Math.max(0, Number(session.elapsedSecs || 0)),
+    lastFocusAt: session.endedAt,
+    latestFocusAchievement: session.achievement || record.latestFocusAchievement || '',
+    latestMilestone: session.milestone || record.latestMilestone || '',
+    benchmarkPercent: session.benchmarkPercent ?? record.benchmarkPercent ?? null,
+  });
+}
+
+function focusTargetLabel(type, row) {
+  if (type === 'task' || type === 'project' || type === 'book') return String(row.title || row.taskLabel || 'Untitled');
+  if (type === 'prayer') return String(row.subject || row.title || 'Prayer');
+  if (type === 'scripture') return String(row.passage || row.title || 'Scripture reading');
+  return 'Focus record';
+}
+
+function focusTargetMeta(type, row) {
+  if (type === 'task') return row.completedAt ? 'complete' : row.priority || 'open';
+  if (type === 'project') return row.phase || 'project';
+  if (type === 'prayer') return row.status || row.type || 'prayer';
+  if (type === 'scripture') return row.translation || row.bookName || 'Bible';
+  if (type === 'book') return row.status || row.author || 'reading';
+  return '';
 }
 
 export async function saveBookMarks(date, changes) {

@@ -12,6 +12,8 @@ import {
   activityFeed,
   completeTask,
   saveFocusSession,
+  getFocusDashboard,
+  listFocusTargets,
   saveBookMarks,
   getDailySpread,
   getPreference,
@@ -27,6 +29,7 @@ import { retryVerification } from './auth-ui.js?v=__BUILD__';
 import { esc } from '../util/esc.js?v=__BUILD__';
 import { createRhythmBibleUI } from './rhythm-bible-ui.js?v=__BUILD__';
 import { createNotificationsUI } from './notifications.js?v=__BUILD__';
+import { createFocusGarden, pickFocusReward } from './focus-garden.js?v=__BUILD__';
 
 const roomMap = document.getElementById('room-map');
 const roomInterface = document.getElementById('room-interface');
@@ -80,6 +83,9 @@ export function createHouseUI({ world, soundscape, showToast, pulseHaptic, authS
   let mojiTimer = 0;
   let roomBusy = false;
   let focus = createFocusState();
+  let focusGarden = null;
+  let focusTargets = [];
+  let focusDashboard = null;
   let bookDate = todayKey();
   let selectedSticker = '';
   let nesHistory = loadHistory();
@@ -126,6 +132,9 @@ export function createHouseUI({ world, soundscape, showToast, pulseHaptic, authS
     document.getElementById('directory-toggle').addEventListener('click', openDirectory);
     document.getElementById('signs-button').addEventListener('click', openSigns);
     document.getElementById('lantern-button').addEventListener('click', openNes);
+    document.getElementById('moji-button')?.addEventListener('click', () => {
+      showMoji('wave', 'I am here. Pick one faithful thing and we will tend it together.', { force: true });
+    });
     document.querySelectorAll('[data-close-directory]').forEach(button => button.addEventListener('click', closeDirectory));
     document.querySelectorAll('[data-close-panel]').forEach(button => button.addEventListener('click', closeFeaturePanel));
     document.querySelectorAll('[data-close-special]').forEach(button => button.addEventListener('click', closeSpecialWorld));
@@ -345,6 +354,7 @@ export function createHouseUI({ world, soundscape, showToast, pulseHaptic, authS
     panelContent.innerHTML = `
       <form class="feature-form" id="feature-form" novalidate>
         ${feature.fields.map(field => renderField(field, displayValue(feature.id, field.key, defaults[field.key]))).join('')}
+        ${renderLinkedFocusLog(record)}
         <div class="attachments-field"><span class="field-label">Images</span><div id="feature-attachments"></div></div>
         <p class="field-error" id="feature-form-error" role="alert"></p>
       </form>
@@ -457,108 +467,367 @@ export function createHouseUI({ world, soundscape, showToast, pulseHaptic, authS
     if (!open) return;
     if (open === bibleWorld) dailySystems.stopAudio();
     open.hidden = true;
-    if (open === focusWorld && focus.state === 'running') pauseFocus();
+    if (open === focusWorld) {
+      if (focus.state === 'running') pauseFocus();
+      stopFocusAudio(false);
+    }
     lastOverlayFocus?.focus?.();
   }
 
   function bindFocus() {
+    const canvas = document.getElementById('focus-growth-canvas');
+    focusGarden = createFocusGarden(canvas);
     document.querySelectorAll('[data-focus-minutes]').forEach(button => {
       button.addEventListener('click', () => {
         if (focus.state !== 'ready') return;
         focus.minutes = Number(button.dataset.focusMinutes);
-        focus.remaining = focus.minutes * 60;
+        focus.mode = focus.minutes > 0 ? 'timed' : 'untimed';
+        focus.remaining = Math.max(0, focus.minutes * 60);
+        document.getElementById('focus-custom-minutes').value = '';
         document.querySelectorAll('[data-focus-minutes]').forEach(item => item.classList.toggle('is-active', item === button));
         paintFocus();
       });
     });
+    document.getElementById('focus-custom-minutes').addEventListener('input', event => {
+      if (focus.state !== 'ready') return;
+      const minutes = Math.max(0, Math.min(480, Number(event.target.value) || 0));
+      if (!minutes) return;
+      focus.minutes = minutes;
+      focus.mode = 'timed';
+      focus.remaining = minutes * 60;
+      document.querySelectorAll('[data-focus-minutes]').forEach(item => item.classList.remove('is-active'));
+      paintFocus();
+    });
+    document.getElementById('focus-link-type').addEventListener('change', renderFocusTargets);
+    document.getElementById('focus-music').addEventListener('change', event => {
+      focus.music = event.target.value;
+      paintFocusAudio();
+    });
+    document.getElementById('focus-rain-toggle').addEventListener('click', toggleFocusRain);
+    document.getElementById('focus-sound').addEventListener('click', toggleFocusRain);
     document.getElementById('focus-primary').addEventListener('click', toggleFocus);
     document.getElementById('focus-reset').addEventListener('click', resetFocus);
-    document.getElementById('focus-finish').addEventListener('click', () => finishFocus(false));
+    document.getElementById('focus-finish').addEventListener('click', () => prepareFocusCompletion(false));
+    document.getElementById('focus-return').addEventListener('click', returnToFocus);
+    document.getElementById('focus-save').addEventListener('click', saveFocusReflection);
+    document.getElementById('focus-again').addEventListener('click', () => resetFocus({ clearLabel: true }));
+    document.getElementById('focus-benchmark').addEventListener('input', event => {
+      document.getElementById('focus-benchmark-output').textContent = `${event.target.value}%`;
+    });
   }
 
-  function openFocus() {
+  async function openFocus() {
     openSpecial(focusWorld);
+    document.getElementById('focus-error').textContent = '';
+    await loadFocusContext();
+    focusGarden?.resize();
     paintFocus();
   }
 
-  function toggleFocus() {
+  async function toggleFocus() {
     if (focus.state === 'running') return pauseFocus();
+    if (focus.state === 'reflecting' || focus.state === 'revealed') return;
     const label = document.getElementById('focus-label').value.trim();
     if (!label) {
-      document.getElementById('focus-error').textContent = 'Name the work before starting the chamber.';
+      document.getElementById('focus-error').textContent = 'Name the work before planting this session.';
       document.getElementById('focus-label').focus();
       return;
     }
+    const linkType = document.getElementById('focus-link-type').value;
+    const linkTarget = document.getElementById('focus-link-target');
+    if (linkType !== 'general' && !linkTarget.value) {
+      document.getElementById('focus-error').textContent = `Choose the ${linkType} this session should return to.`;
+      linkTarget.focus();
+      return;
+    }
     document.getElementById('focus-error').textContent = '';
+    if (!focus.reward) {
+      focus.reward = pickFocusReward(
+        `${todayKey()}:${label}:${linkType}`,
+        focusDashboard?.completedCount || 0,
+      );
+      focusGarden?.setReward(focus.reward, focusProgress());
+    }
+    focus.music = document.getElementById('focus-music').value;
     focus.state = 'running';
     focus.startedAt = focus.startedAt || Date.now();
     focus.lastTick = Date.now();
     focus.interval = window.setInterval(tickFocus, 250);
-    soundscape.focus?.(true);
+    await startFocusAudio();
+    showMoji('focus', `Your ${focus.reward.kind === 'flower' ? focus.reward.name : focus.reward.kind} is beginning. Stay with the work in front of you.`, { force: true });
     paintFocus();
   }
 
   function pauseFocus() {
     if (focus.state !== 'running') return;
-    tickFocus();
+    advanceFocusClock();
     clearInterval(focus.interval);
     focus.interval = 0;
     focus.state = 'paused';
-    soundscape.focus?.(false);
+    stopFocusAudio(false);
     paintFocus();
   }
 
   function tickFocus() {
     if (focus.state !== 'running') return;
-    const now = Date.now();
-    const delta = (now - focus.lastTick) / 1000;
-    focus.lastTick = now;
-    focus.remaining = Math.max(0, focus.remaining - delta);
-    focus.elapsed += delta;
-    if (focus.remaining <= 0) finishFocus(true);
-    else paintFocus();
+    advanceFocusClock();
+    if (focus.mode === 'timed' && focus.remaining <= 0) {
+      prepareFocusCompletion(true);
+      return;
+    }
+    focusGarden?.setProgress(focusProgress());
+    paintFocus();
   }
 
-  async function finishFocus(natural = false) {
-    if (focus.state === 'ready' || focus.saving) return;
-    if (focus.state === 'running') tickFocus();
+  function advanceFocusClock() {
+    if (focus.state !== 'running') return;
+    const now = Date.now();
+    const delta = Math.max(0, (now - focus.lastTick) / 1000);
+    focus.lastTick = now;
+    focus.elapsed += delta;
+    if (focus.mode === 'timed') focus.remaining = Math.max(0, focus.remaining - delta);
+  }
+
+  function prepareFocusCompletion(natural = false) {
+    if (focus.state === 'ready' || focus.state === 'reflecting' || focus.state === 'revealed' || focus.saving) return;
+    if (focus.state === 'running') advanceFocusClock();
     clearInterval(focus.interval);
     focus.interval = 0;
+    focus.natural = natural || (focus.mode === 'timed' && focus.remaining <= 0);
+    focus.state = 'reflecting';
+    stopFocusAudio(false);
+    document.getElementById('focus-kept').checked = focus.natural;
+    document.getElementById('focus-completion-title').textContent = focus.natural
+      ? 'The covenant is complete. What moved?'
+      : 'What moved during this session?';
+    document.getElementById('focus-return').hidden = focus.natural;
+    document.getElementById('focus-setup').hidden = true;
+    document.getElementById('focus-reveal').hidden = true;
+    document.getElementById('focus-completion').hidden = false;
+    if (focus.natural) {
+      focusGarden?.reveal();
+      soundscape.reward?.();
+    } else {
+      focusGarden?.setProgress(focusProgress());
+    }
+    paintFocus();
+    window.setTimeout(() => document.getElementById('focus-achievement').focus(), 40);
+  }
+
+  function returnToFocus() {
+    if (focus.natural) return;
+    focus.state = 'paused';
+    document.getElementById('focus-completion').hidden = true;
+    document.getElementById('focus-setup').hidden = false;
+    paintFocus();
+  }
+
+  async function saveFocusReflection() {
+    if (focus.state !== 'reflecting' || focus.saving) return;
+    const saveButton = document.getElementById('focus-save');
+    const kept = document.getElementById('focus-kept').checked;
+    const completed = focus.natural || kept;
+    const linkType = document.getElementById('focus-link-type').value;
+    const linkTarget = document.getElementById('focus-link-target');
+    const linkOption = linkTarget.selectedOptions[0];
     focus.saving = true;
+    saveButton.disabled = true;
+    saveButton.classList.add('is-saving');
+    document.getElementById('focus-save-error').textContent = '';
     try {
       await saveFocusSession({
         taskLabel: document.getElementById('focus-label').value,
         minutes: focus.minutes,
         elapsedSecs: Math.max(1, Math.round(focus.elapsed)),
-        status: natural || focus.remaining <= 0 ? 'completed' : 'stopped',
+        status: completed ? 'completed' : 'stopped',
+        mode: focus.mode,
+        linkType,
+        linkId: linkType === 'general' ? '' : linkTarget.value,
+        achievement: document.getElementById('focus-achievement').value,
+        milestone: document.getElementById('focus-milestone').value,
+        benchmarkPercent: document.getElementById('focus-benchmark').value,
+        reward: { ...focus.reward, earned: completed, progress: completed ? 1 : focusProgress() },
+        soundMode: focus.music === 'silent' ? 'silent' : `${focus.music}${focus.rain ? '+rain' : ''}`,
+        notes: linkOption?.dataset.meta || '',
       });
-      soundscape.reward?.();
-      world.celebrateRoom?.('workshop');
-      await refreshWorld(natural ? 'Focus complete. Deep work changed the Workshop.' : 'Focus recorded honestly.');
-      resetFocus();
+      focus.state = 'revealed';
+      if (completed) {
+        focusGarden?.reveal();
+        soundscape.reward?.();
+        pulseHaptic([10, 30, 14, 42, 18]);
+        world.celebrateRoom?.('workshop');
+      }
+      renderFocusReveal(completed);
+      paintFocus();
+      await refreshWorld(completed
+        ? `${focus.reward.name} has been added to your Focus Garden.`
+        : 'The session was recorded honestly; the seed is waiting for another faithful return.');
+      await loadFocusContext();
+      showMoji(
+        completed ? 'celebrate' : 'encourage',
+        completed
+          ? `${focus.reward.name} opened. Your work and its fruit are now part of the sanctuary.`
+          : 'Honesty belongs in the log too. Begin again when you are ready.',
+        { force: true },
+      );
     } catch (error) {
       console.error('[game] focus save failed', error);
-      document.getElementById('focus-error').textContent = 'The session did not save. Please try again.';
+      document.getElementById('focus-save-error').textContent = 'The session did not save. Please try again.';
     } finally {
       focus.saving = false;
+      saveButton.disabled = false;
+      saveButton.classList.remove('is-saving');
     }
   }
 
-  function resetFocus() {
+  function resetFocus({ clearLabel = false } = {}) {
     clearInterval(focus.interval);
-    focus = createFocusState(focus.minutes);
+    stopFocusAudio(true);
+    const minutes = focus.minutes;
+    const music = document.getElementById('focus-music').value;
+    const rain = focus.rain;
+    focus = createFocusState(minutes);
+    focus.music = music;
+    focus.rain = rain;
+    if (clearLabel) document.getElementById('focus-label').value = '';
+    document.getElementById('focus-achievement').value = '';
+    document.getElementById('focus-milestone').value = '';
+    document.getElementById('focus-benchmark').value = '0';
+    document.getElementById('focus-benchmark-output').textContent = '0%';
+    document.getElementById('focus-kept').checked = false;
+    document.getElementById('focus-error').textContent = '';
+    document.getElementById('focus-save-error').textContent = '';
+    document.getElementById('focus-setup').hidden = false;
+    document.getElementById('focus-completion').hidden = true;
+    document.getElementById('focus-reveal').hidden = true;
+    focusGarden?.setReward(pickFocusReward('waiting-seed'), 0);
     paintFocus();
   }
 
   function paintFocus() {
     const whole = focus.minutes * 60;
-    const ratio = whole ? focus.remaining / whole : 1;
-    const minutes = Math.floor(focus.remaining / 60);
-    const seconds = Math.floor(focus.remaining % 60);
+    const displayed = focus.mode === 'untimed' ? focus.elapsed : focus.remaining;
+    const ratio = focus.mode === 'untimed' ? focusProgress() : (whole ? focus.remaining / whole : 1);
+    const minutes = Math.floor(displayed / 60);
+    const seconds = Math.floor(displayed % 60);
     document.getElementById('focus-time').textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-    document.getElementById('focus-state').textContent = focus.state;
+    document.getElementById('focus-state').textContent = focus.mode === 'untimed' && focus.state === 'ready' ? 'open session' : focus.state;
     document.getElementById('focus-ring').style.setProperty('--focus-angle', `${Math.max(0, ratio * 360)}deg`);
     document.getElementById('focus-primary').innerHTML = icon(focus.state === 'running' ? 'pause' : 'play', { size: 25 });
+    document.getElementById('focus-primary').setAttribute('aria-label', focus.state === 'running' ? 'Pause focus' : 'Start or resume focus');
+    const locked = focus.state !== 'ready';
+    document.querySelectorAll('#focus-setup input:not(#focus-kept), #focus-setup select').forEach(field => { field.disabled = locked; });
+    document.querySelectorAll('[data-focus-minutes]').forEach(button => { button.disabled = locked; });
+    renderFocusTargets();
+    document.getElementById('focus-finish').disabled = focus.state === 'ready';
+    const reward = focus.reward;
+    document.getElementById('focus-reward-kind').textContent = reward
+      ? `${labelize(reward.kind)} growing`
+      : 'A seed is waiting';
+    document.getElementById('focus-reward-name').textContent = reward?.name || 'Begin to discover what will grow';
+    focusGarden?.setProgress(focusProgress());
+    paintFocusAudio();
+  }
+
+  function focusProgress() {
+    if (focus.state === 'revealed' || focus.natural) return 1;
+    if (focus.mode === 'untimed') return Math.min(0.94, focus.elapsed / 3600);
+    const whole = Math.max(1, focus.minutes * 60);
+    return Math.max(0, Math.min(1, focus.elapsed / whole));
+  }
+
+  async function loadFocusContext() {
+    [focusDashboard, focusTargets] = await Promise.all([getFocusDashboard(), listFocusTargets()]);
+    document.getElementById('focus-today-hours').textContent = formatFocusDuration(focusDashboard.todaySeconds);
+    document.getElementById('focus-week-hours').textContent = formatFocusDuration(focusDashboard.weekSeconds);
+    document.getElementById('focus-bloom-count').textContent = String(focusDashboard.rewardCount);
+    document.getElementById('focus-completion-rate').textContent = `${focusDashboard.completionRate}% completed`;
+    renderFocusTargets();
+    renderFocusHistory();
+  }
+
+  function renderFocusTargets() {
+    const type = document.getElementById('focus-link-type').value;
+    const select = document.getElementById('focus-link-target');
+    const group = focusTargets.find(item => item.type === type);
+    select.disabled = type === 'general' || !group?.items.length || focus.state !== 'ready';
+    if (type === 'general') {
+      select.innerHTML = '<option value="">Focus log only</option>';
+      return;
+    }
+    if (!group?.items.length) {
+      select.innerHTML = `<option value="">No saved ${esc(group?.label?.toLowerCase() || type)} yet</option>`;
+      return;
+    }
+    const prior = select.value;
+    select.innerHTML = `<option value="">Choose ${esc(group.label.toLowerCase())}</option>${group.items.map(item => `<option value="${esc(item.id)}" data-meta="${esc(item.meta)}">${esc(item.label)}${item.meta ? ` · ${esc(item.meta)}` : ''}</option>`).join('')}`;
+    if ([...select.options].some(option => option.value === prior)) select.value = prior;
+  }
+
+  function renderFocusHistory() {
+    const target = document.getElementById('focus-history');
+    const sessions = focusDashboard?.sessions?.slice(0, 8) || [];
+    if (!sessions.length) {
+      target.innerHTML = '<p class="quiet-empty">Your first focused minute will appear here.</p>';
+      return;
+    }
+    target.innerHTML = sessions.map(session => `
+      <article class="focus-history-row ${session.status === 'completed' ? 'is-complete' : ''}">
+        <span class="focus-history-mark">${icon(session.reward?.kind === 'scene' ? 'image' : session.reward?.kind === 'quote' ? 'quote' : 'flower-2', { size: 18 })}</span>
+        <div><strong>${esc(session.taskLabel || 'Focus session')}</strong><small>${formatFocusDuration(session.elapsedSecs)}${session.linkType && session.linkType !== 'general' ? ` · ${esc(labelize(session.linkType))}` : ''}</small>${session.achievement ? `<p>${esc(session.achievement)}</p>` : ''}</div>
+        <span class="focus-history-reward">${esc(session.status === 'completed' ? session.reward?.name || 'kept' : 'recorded')}</span>
+      </article>
+    `).join('');
+  }
+
+  function renderFocusReveal(completed) {
+    const reward = focus.reward;
+    document.getElementById('focus-completion').hidden = true;
+    document.getElementById('focus-setup').hidden = true;
+    document.getElementById('focus-reveal').hidden = false;
+    document.getElementById('focus-reveal-kind').textContent = completed ? `${labelize(reward.kind)} earned` : 'Seed preserved';
+    document.getElementById('focus-reveal-title').textContent = completed ? reward.name : `${reward.name} is still growing`;
+    document.getElementById('focus-reveal-scientific').textContent = completed ? reward.scientificName : 'Complete a focus covenant to open the full field note.';
+    document.getElementById('focus-reveal-origin').textContent = completed ? reward.origin : 'Waiting in your Focus Garden.';
+    document.getElementById('focus-reveal-family').textContent = completed ? reward.family : labelize(reward.kind);
+    document.getElementById('focus-reveal-detail').textContent = completed ? reward.detail : 'Your elapsed focus was recorded. The reward will fully reveal after a session you mark as kept.';
+    document.getElementById('focus-reveal-scripture').textContent = reward.scripture;
+  }
+
+  function toggleFocusRain() {
+    focus.rain = !focus.rain;
+    if (focus.state === 'running') soundscape.focus?.(true, focus.rain);
+    paintFocusAudio();
+  }
+
+  function paintFocusAudio() {
+    const rainEnabled = focus.rain && focus.music !== 'silent';
+    for (const id of ['focus-sound', 'focus-rain-toggle']) {
+      const button = document.getElementById(id);
+      button.setAttribute('aria-checked', String(rainEnabled));
+      button.classList.toggle('is-active', rainEnabled);
+    }
+    const player = document.getElementById('focus-player');
+    player.hidden = !isYouTubeFocusMusic(focus.music);
+  }
+
+  async function startFocusAudio() {
+    await soundscape.start?.();
+    soundscape.focus?.(true, focus.rain && focus.music !== 'silent');
+    const frame = document.getElementById('focus-youtube');
+    if (isYouTubeFocusMusic(focus.music)) {
+      const start = focus.music === 'P-XnYn3FUq4' ? 959 : 0;
+      const src = `https://www.youtube-nocookie.com/embed/${focus.music}?autoplay=1&playsinline=1&rel=0&enablejsapi=1&start=${start}`;
+      if (frame.src !== src) frame.src = src;
+      frame.contentWindow?.postMessage(JSON.stringify({ event: 'command', func: 'playVideo', args: [] }), '*');
+    }
+  }
+
+  function stopFocusAudio(clearPlayer = false) {
+    soundscape.focus?.(false);
+    const frame = document.getElementById('focus-youtube');
+    frame.contentWindow?.postMessage(JSON.stringify({ event: 'command', func: 'pauseVideo', args: [] }), '*');
+    if (clearPlayer) frame.removeAttribute('src');
   }
 
   function bindBook() {
@@ -897,13 +1166,13 @@ export function createHouseUI({ world, soundscape, showToast, pulseHaptic, authS
 
   function scheduleMoji() {
     clearTimeout(mojiTimer);
-    mojiTimer = window.setTimeout(() => showMoji('banner', 'Commit your work to the Lord, and your plans will be established. Proverbs 16:3'), 24000);
+    mojiTimer = window.setTimeout(() => showMoji('banner', 'Commit your work to the Lord, and your plans will be established. Proverbs 16:3'), 7000);
   }
 
-  async function showMoji(action, message) {
-    if (!await getPreference('mojiCameos', true)) return;
+  async function showMoji(action, message, { force = false } = {}) {
+    if (!force && !await getPreference('mojiCameos', true)) return;
     const cfg = await getMojiConfig();
-    if (cfg.popups === 'off' || !mojiCameo.hidden) return;
+    if ((!force && cfg.popups === 'off') || !mojiCameo.hidden) return;
     document.getElementById('moji-character').innerHTML = renderBitmoji(cfg, { action });
     document.getElementById('moji-message').textContent = message;
     mojiCameo.dataset.action = action;
@@ -950,7 +1219,55 @@ function hydrateStaticIcons() {
 }
 
 function createFocusState(minutes = 25) {
-  return { minutes, remaining: minutes * 60, elapsed: 0, state: 'ready', startedAt: 0, lastTick: 0, interval: 0, saving: false };
+  return {
+    minutes,
+    mode: minutes > 0 ? 'timed' : 'untimed',
+    remaining: Math.max(0, minutes * 60),
+    elapsed: 0,
+    state: 'ready',
+    startedAt: 0,
+    lastTick: 0,
+    interval: 0,
+    saving: false,
+    natural: false,
+    reward: null,
+    music: 'rain',
+    rain: true,
+  };
+}
+
+function isYouTubeFocusMusic(value) {
+  return ['MvPgu-hwYQw', 'P-XnYn3FUq4'].includes(value);
+}
+
+function formatFocusDuration(seconds) {
+  const rawSeconds = Math.max(0, Number(seconds || 0));
+  const totalMinutes = Math.max(0, Math.round(rawSeconds / 60));
+  if (rawSeconds > 0 && totalMinutes === 0) return '<1m';
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  if (!hours) return `${minutes}m`;
+  return minutes ? `${hours}h ${minutes}m` : `${hours}h`;
+}
+
+function renderLinkedFocusLog(record) {
+  const sessions = Array.isArray(record?.focusLog) ? record.focusLog.slice(-5).reverse() : [];
+  if (!sessions.length) return '';
+  return `
+    <section class="linked-focus-log" aria-label="Linked focus progress">
+      <div><span>Focus progress</span><strong>${formatFocusDuration(record.focusSecondsTotal)} gathered</strong></div>
+      ${sessions.map(session => `
+        <article>
+          <span>${esc(formatFocusDuration(session.elapsedSecs))}</span>
+          <div>
+            <strong>${esc(session.achievement || 'Focus session recorded')}</strong>
+            ${session.milestone ? `<small>${esc(session.milestone)}</small>` : ''}
+          </div>
+          ${session.benchmarkPercent == null ? '' : `<b>${esc(session.benchmarkPercent)}%</b>`}
+        </article>
+      `).join('')}
+    </section>
+  `;
 }
 
 function displayValue(featureId, key, value) {
@@ -970,6 +1287,7 @@ function entryMeta(feature, row) {
   const parts = [
     row.status || row.phase || row.type || row.slot || '',
     row.scheduledFor || row.date || row.startedOn || row.dreamDate || '',
+    Number(row.focusSecondsTotal || 0) > 0 ? `${formatFocusDuration(row.focusSecondsTotal)} focus` : '',
     formatWhen(row.updatedAt || row.createdAt),
   ].filter(Boolean);
   return parts.map(labelize).join(' · ');
