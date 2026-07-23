@@ -50,11 +50,15 @@ const soundToggle = document.getElementById('sound-toggle');
 const sheetBackdrop = document.getElementById('sheet-backdrop');
 const rewardReveal = document.getElementById('reward-reveal');
 const continueButton = document.getElementById('continue-button');
-const toast = document.getElementById('toast');
+const notificationRegion = document.getElementById('notification-region');
 const hudProgress = document.querySelector('.hud-progress');
 
 document.querySelectorAll('[data-icon]').forEach(node => {
   node.innerHTML = icon(node.dataset.icon, { size: 18, stroke: 1.5 });
+});
+window.addEventListener('miracle:notify', event => {
+  const detail = event.detail || {};
+  showToast(detail.message || detail.body, detail);
 });
 
 const systemReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -68,7 +72,6 @@ gateIntro.inert = false;
 let activeSheet = null;
 let lastFocus = null;
 let selectedMood = state.entries.attend || null;
-let toastTimer = 0;
 let rewardTimer = 0;
 let sparkTexture = null;
 let houseUI = null;
@@ -141,7 +144,10 @@ async function enterMorning() {
   if (isComplete()) {
     sceneCommand.hidden = true;
     await enterHouse({ remembered: true });
-    showToast('The house remembers this morning.');
+    showToast('The sanctuary remembers this morning.', {
+      title: 'Welcome back',
+      tone: 'success',
+    });
   } else {
     sceneCommand.hidden = false;
     updateCommand();
@@ -272,7 +278,7 @@ async function submitStep(step) {
     await completeStep(step, value);
   } catch (saveError) {
     console.error('[game] morning save failed', saveError);
-    error.textContent = 'The house could not save that yet. Please try again.';
+    error.textContent = 'The sanctuary could not save that yet. Please try again.';
   } finally {
     submit.disabled = false;
     submit.classList.remove('is-saving');
@@ -289,7 +295,10 @@ async function completeStep(step, value) {
   syncWorldState(true, step);
   soundscape.confirm(STEP_ORDER.indexOf(step));
   pulseHaptic([10, 24, 12]);
-  showToast(`${step[0].toUpperCase()}${step.slice(1)} recorded. The house changed.`);
+  showToast(`${step[0].toUpperCase()}${step.slice(1)} recorded. The sanctuary changed.`, {
+    title: 'Pilgrimage saved',
+    tone: 'success',
+  });
 
   if (isComplete()) {
     sceneCommand.hidden = true;
@@ -374,13 +383,81 @@ async function toggleSound() {
   showToast(muted ? 'Sound off' : 'Water and sound on');
 }
 
-function showToast(message) {
-  clearTimeout(toastTimer);
-  toast.textContent = message;
-  toast.hidden = false;
-  toastTimer = window.setTimeout(() => {
-    toast.hidden = true;
-  }, 2600);
+function showToast(message, options = {}) {
+  if (!message || !notificationRegion) return null;
+  const settings = typeof options === 'string' ? { tone: options } : options;
+  const tone = ['success', 'warning', 'error', 'reward'].includes(settings.tone) ? settings.tone : 'info';
+  const title = settings.title || {
+    success: 'Saved',
+    warning: 'A gentle pause',
+    error: 'Something needs attention',
+    reward: 'Miracle Sign',
+    info: 'Sanctuary note',
+  }[tone];
+  const iconName = {
+    success: 'check',
+    warning: 'triangle-alert',
+    error: 'circle-alert',
+    reward: 'sparkles',
+    info: 'bell',
+  }[tone];
+  const notice = document.createElement('article');
+  notice.className = `sanctuary-notice is-${tone}`;
+  notice.setAttribute('role', tone === 'error' ? 'alert' : 'status');
+
+  const mark = document.createElement('span');
+  mark.className = 'notice-mark';
+  mark.setAttribute('aria-hidden', 'true');
+  mark.innerHTML = icon(iconName, { size: 17, stroke: 1.6 });
+
+  const copy = document.createElement('div');
+  copy.className = 'notice-copy';
+  const heading = document.createElement('strong');
+  heading.textContent = title;
+  const body = document.createElement('p');
+  body.textContent = String(message);
+  copy.append(heading, body);
+
+  const closeButton = document.createElement('button');
+  closeButton.type = 'button';
+  closeButton.className = 'notice-close';
+  closeButton.setAttribute('aria-label', 'Dismiss notification');
+  closeButton.innerHTML = icon('x', { size: 16, stroke: 1.5 });
+  notice.append(mark, copy);
+
+  if (settings.actionLabel && typeof settings.onAction === 'function') {
+    const action = document.createElement('button');
+    action.type = 'button';
+    action.className = 'notice-action';
+    action.textContent = settings.actionLabel;
+    action.addEventListener('click', () => {
+      settings.onAction();
+      dismissNotice(notice);
+    });
+    notice.appendChild(action);
+  }
+
+  notice.appendChild(closeButton);
+  closeButton.addEventListener('click', () => dismissNotice(notice));
+  notificationRegion.prepend(notice);
+  requestAnimationFrame(() => notice.classList.add('is-visible'));
+
+  while (notificationRegion.children.length > 4) {
+    notificationRegion.lastElementChild?.remove();
+  }
+
+  const duration = Number(settings.duration ?? (tone === 'error' ? 6200 : 4200));
+  if (duration > 0) {
+    notice.dismissTimer = window.setTimeout(() => dismissNotice(notice), duration);
+  }
+  return notice;
+}
+
+function dismissNotice(notice) {
+  if (!notice?.isConnected || notice.classList.contains('is-leaving')) return;
+  clearTimeout(notice.dismissTimer);
+  notice.classList.add('is-leaving');
+  window.setTimeout(() => notice.remove(), motionReduced() ? 0 : 220);
 }
 
 function pulseHaptic(pattern) {

@@ -1,8 +1,8 @@
 {
-  "name": "miracle-living-house",
+  "name": "miracle-sanctuary",
   "version": "1.0.0",
   "private": true,
-  "description": "Miracle: The Living House game, complete PWA, Bible corpus, and sync backend.",
+  "description": "Miracle Sanctuary game, complete PWA, Bible corpus, and sync backend.",
   "type": "module",
   "engines": {
     "node": ">=20"

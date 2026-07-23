@@ -1,5 +1,5 @@
 /*
- * Integrated Living House design layer.
+ * Integrated Miracle Sanctuary design layer.
  *
  * The Three.js architecture and game systems remain in game.js/game.css. This
  * file supplies the repository build's frosted-glass language, typography,
@@ -90,7 +90,7 @@ html {
 .glass-system .feature-object,
 .glass-system .icon-button,
 .glass-system .feature-arrow,
-.glass-system .toast,
+.glass-system .sanctuary-notice,
 .glass-system .game-update {
   border: 1px solid var(--glass-border);
   background:
@@ -332,7 +332,7 @@ html {
   .glass-system .feature-object,
   .glass-system .icon-button,
   .glass-system .feature-arrow,
-  .glass-system .toast,
+  .glass-system .sanctuary-notice,
   .glass-system .game-update {
     background-color: rgba(2, 13, 8, 0.94);
   }

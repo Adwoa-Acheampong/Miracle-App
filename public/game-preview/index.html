@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#020403">
   <meta name="color-scheme" content="dark">
   <meta name="miracle-build" content="__BUILD__">
-  <title>Miracle: The Living House</title>
+  <title>Miracle Sanctuary</title>
   <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
   <link rel="manifest" href="./manifest.json?v=__BUILD__">
@@ -24,9 +24,9 @@
 
     <section class="auth-world" id="auth-world" role="dialog" aria-modal="true" aria-labelledby="auth-title" hidden>
       <div class="auth-mark" aria-hidden="true"><span></span></div>
-      <p class="eyebrow">Miracle · The Living House</p>
-      <h1 id="auth-title">Welcome home</h1>
-      <p class="auth-reflection">A quiet place for faith, work, care, and memory.</p>
+      <p class="eyebrow">Miracle Sanctuary</p>
+      <h1 id="auth-title">Welcome to the sanctuary</h1>
+      <p class="auth-reflection">“There are only two ways to live your life. One is as though nothing is a miracle. The other is as though everything is a miracle.”</p>
       <div class="auth-tabs" role="tablist" aria-label="Account action">
         <button type="button" role="tab" data-auth-mode="login" aria-selected="true">Log in</button>
         <button type="button" role="tab" data-auth-mode="signup" aria-selected="false">Create account</button>
@@ -36,14 +36,15 @@
         <label class="game-field" for="auth-email"><span>Email</span><input id="auth-email" name="email" type="email" autocomplete="email" required></label>
         <label class="game-field" for="auth-password"><span>Password</span><input id="auth-password" name="password" type="password" minlength="8" autocomplete="current-password" required></label>
         <p class="field-error auth-status" id="auth-status" role="status" aria-live="polite"></p>
-        <button class="panel-save auth-submit" type="submit"><span>Enter the house</span><span data-icon="arrow-right"></span></button>
+        <button class="panel-save auth-submit" type="submit"><span>Begin the pilgrimage</span><span data-icon="arrow-right"></span></button>
       </form>
       <button class="auth-forgot" id="auth-forgot" type="button">Forgot password?</button>
-      <button class="auth-guest" id="auth-guest" type="button" hidden>Continue in local test mode</button>
+      <p class="auth-local-note" id="auth-local-note" hidden>Local preview does not require an account.</p>
+      <button class="auth-guest" id="auth-guest" type="button" hidden>Begin the pilgrimage locally</button>
     </section>
 
-    <header class="hud" aria-label="Living House status" inert>
-      <button class="icon-button hud-menu" id="directory-toggle" type="button" aria-label="Open house directory" title="House directory">
+    <header class="hud" aria-label="Miracle Sanctuary status" inert>
+      <button class="icon-button hud-menu" id="directory-toggle" type="button" aria-label="Open sanctuary directory" title="Sanctuary directory">
         <span data-icon="menu"></span>
       </button>
       <div class="hud-brand">
@@ -69,11 +70,11 @@
     </header>
 
     <section class="gate-intro" id="gate-intro" aria-labelledby="gate-title" inert>
-      <p class="eyebrow">The Living House</p>
+      <p class="eyebrow">Miracle Sanctuary</p>
       <h1 id="gate-title">Morning Gate</h1>
-      <p class="gate-verse">"This is the day the Lord has made."</p>
+      <p class="gate-verse">“There are only two ways to live your life. One is as though nothing is a miracle. The other is as though everything is a miracle.”</p>
       <button class="primary-command" id="enter-button" type="button">
-        <span>Enter morning</span>
+        <span>Begin the pilgrimage</span>
         <span data-icon="arrow-right"></span>
       </button>
       <p class="sound-note">Water and sound begin after your tap.</p>
@@ -91,7 +92,7 @@
       </button>
     </section>
 
-    <nav class="room-map" id="room-map" aria-label="The Living House" hidden>
+    <nav class="room-map" id="room-map" aria-label="Miracle Sanctuary" hidden>
       <button type="button" data-room="chapel"><span data-icon="flame"></span><span>Chapel</span><i></i></button>
       <button type="button" data-room="workshop"><span data-icon="hammer"></span><span>Workshop</span><i></i></button>
       <button type="button" data-room="garden"><span data-icon="flower-2"></span><span>Garden</span><i></i></button>
@@ -125,13 +126,13 @@
 
     <aside class="directory" id="directory" aria-labelledby="directory-title" hidden>
       <div class="overlay-head">
-        <div><p class="eyebrow">Every room</p><h2 id="directory-title">House directory</h2></div>
+        <div><p class="eyebrow">Every room</p><h2 id="directory-title">Sanctuary directory</h2></div>
         <button class="icon-button" type="button" data-close-directory aria-label="Close directory"><span data-icon="x"></span></button>
       </div>
       <div class="directory-body" id="directory-body"></div>
       <div class="directory-foot">
         <button type="button" aria-label="Replay welcome tour" data-directory-action="onboarding"><span data-icon="map"></span><span>Replay welcome tour</span></button>
-        <button type="button" aria-label="House settings" data-directory-action="settings"><span data-icon="settings"></span><span>House settings</span></button>
+        <button type="button" aria-label="Sanctuary settings" data-directory-action="settings"><span data-icon="settings"></span><span>Sanctuary settings</span></button>
         <button type="button" aria-label="Open Trash" data-directory-action="trash"><span data-icon="trash-2"></span><span>Trash</span></button>
       </div>
     </aside>
@@ -155,7 +156,7 @@
 
     <section class="rhythm-world special-world" id="rhythm-world" role="dialog" aria-modal="true" aria-labelledby="rhythm-title" hidden>
       <div class="overlay-head">
-        <button class="icon-button" type="button" data-close-special aria-label="Return to the house"><span data-icon="arrow-left"></span></button>
+        <button class="icon-button" type="button" data-close-special aria-label="Return to the sanctuary"><span data-icon="arrow-left"></span></button>
         <div><p class="eyebrow">Rule of Life</p><h2 id="rhythm-title">Today's path</h2></div>
         <button class="icon-button" id="rhythm-edit" type="button" aria-label="Edit daily rule"><span data-icon="settings"></span></button>
       </div>
@@ -266,10 +267,10 @@
     <section class="search-world special-world" id="search-world" role="dialog" aria-modal="true" aria-labelledby="search-title" hidden>
       <div class="overlay-head">
         <button class="icon-button" type="button" data-close-special aria-label="Return to Archive"><span data-icon="arrow-left"></span></button>
-        <div><p class="eyebrow">Archive</p><h2 id="search-title">Search the house</h2></div>
+        <div><p class="eyebrow">Archive</p><h2 id="search-title">Search the sanctuary</h2></div>
         <span></span>
       </div>
-      <label class="search-field" for="house-search"><span data-icon="search"></span><input id="house-search" type="search" aria-label="Search the house" placeholder="A word, person, prayer, idea..." autocomplete="off"></label>
+      <label class="search-field" for="house-search"><span data-icon="search"></span><input id="house-search" type="search" aria-label="Search the sanctuary" placeholder="A word, person, prayer, idea..." autocomplete="off"></label>
       <div class="search-results" id="search-results"><p class="quiet-empty">Type two letters to begin.</p></div>
     </section>
 
@@ -285,7 +286,7 @@
 
     <section class="signs-world special-world" id="signs-world" role="dialog" aria-modal="true" aria-labelledby="signs-title" hidden>
       <div class="overlay-head">
-        <button class="icon-button" type="button" data-close-special aria-label="Return to house"><span data-icon="arrow-left"></span></button>
+        <button class="icon-button" type="button" data-close-special aria-label="Return to sanctuary"><span data-icon="arrow-left"></span></button>
         <div><p class="eyebrow">What your life has made visible</p><h2 id="signs-title">Miracle Signs</h2></div>
         <span></span>
       </div>
@@ -305,7 +306,7 @@
 
     <section class="nes-world special-world" id="nes-world" role="dialog" aria-modal="true" aria-labelledby="nes-title" hidden>
       <div class="overlay-head">
-        <button class="icon-button" type="button" data-close-special aria-label="Return to house"><span data-icon="arrow-left"></span></button>
+        <button class="icon-button" type="button" data-close-special aria-label="Return to sanctuary"><span data-icon="arrow-left"></span></button>
         <div><p class="eyebrow">Guidance tool</p><h2 id="nes-title">Nes lantern</h2></div>
         <button class="icon-button" id="nes-clear" type="button" aria-label="Clear conversation"><span data-icon="eraser"></span></button>
       </div>
@@ -320,8 +321,8 @@
 
     <section class="settings-world special-world" id="settings-world" role="dialog" aria-modal="true" aria-labelledby="settings-title" hidden>
       <div class="overlay-head">
-        <button class="icon-button" type="button" data-close-special aria-label="Return to house"><span data-icon="arrow-left"></span></button>
-        <div><p class="eyebrow">Make the house yours</p><h2 id="settings-title">House settings</h2></div>
+        <button class="icon-button" type="button" data-close-special aria-label="Return to sanctuary"><span data-icon="arrow-left"></span></button>
+        <div><p class="eyebrow">Make the sanctuary yours</p><h2 id="settings-title">Sanctuary settings</h2></div>
         <span></span>
       </div>
       <div class="settings-scroll">
@@ -357,20 +358,20 @@
           <p class="settings-kicker" id="setting-account-title">Account</p>
           <div class="account-plaque">
             <span class="account-initials" id="settings-initials">M</span>
-            <span><strong id="settings-account-name">Miracle keeper</strong><small id="settings-account-email">Local house</small></span>
+            <span><strong id="settings-account-name">Miracle keeper</strong><small id="settings-account-email">Local sanctuary</small></span>
           </div>
           <p class="settings-status" id="settings-status" role="status" aria-live="polite"></p>
           <button class="settings-command" id="settings-verify" type="button"><span data-icon="mail-check"></span><span>Resend verification email</span></button>
-          <button class="settings-command" id="settings-logout" type="button"><span data-icon="log-out"></span><span>Log out of this house</span></button>
+          <button class="settings-command" id="settings-logout" type="button"><span data-icon="log-out"></span><span>Log out of this sanctuary</span></button>
         </section>
-        <p class="build-stamp" id="game-build-stamp">Living House build</p>
+        <p class="build-stamp" id="game-build-stamp">Miracle Sanctuary build</p>
       </div>
     </section>
 
     <section class="welcome-tour" id="welcome-tour" role="dialog" aria-modal="true" aria-labelledby="tour-title" hidden>
       <div class="tour-visual" id="tour-visual" aria-hidden="true"><span data-icon="door-open"></span></div>
       <p class="eyebrow" id="tour-step">1 of 5</p>
-      <h2 id="tour-title">Your life moves the house</h2>
+      <h2 id="tour-title">Your life shapes the sanctuary</h2>
       <p id="tour-copy">Prayer, work, care, and memory are the moves. The world changes only after something real is saved.</p>
       <div class="tour-actions">
         <button type="button" id="tour-skip">Skip</button>
@@ -386,7 +387,7 @@
 
     <aside class="game-update" id="game-update" role="status" aria-live="polite" hidden>
       <span data-icon="refresh-cw"></span>
-      <p><strong>New version ready</strong><small>Your records are safe.</small></p>
+      <p><strong>New sanctuary version ready</strong><small>Your records are safe.</small></p>
       <button type="button" id="game-update-reload">Reload</button>
       <button type="button" id="game-update-later" aria-label="Remind me later"><span data-icon="x"></span></button>
     </aside>
@@ -446,14 +447,14 @@
         <span></span>
       </div>
       <h2 id="reward-title">First Light</h2>
-      <p class="reward-copy">You anchored, aimed, and attended. The house is awake.</p>
+      <p class="reward-copy">You anchored, aimed, and attended. The sanctuary is awake.</p>
       <button class="primary-command" id="continue-button" type="button">
-        <span>Enter the house</span>
+        <span>Enter the sanctuary</span>
         <span data-icon="arrow-right"></span>
       </button>
     </section>
 
-    <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+    <section class="notification-region" id="notification-region" aria-label="Sanctuary notifications" aria-live="polite" aria-atomic="false"></section>
   </main>
 
   <script type="module" src="./game.js?v=__BUILD__"></script>

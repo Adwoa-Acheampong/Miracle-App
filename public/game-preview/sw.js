@@ -60,7 +60,7 @@ self.addEventListener('push', event => {
   try { payload = event.data?.json() || {}; } catch { payload = { body: event.data?.text() || '' }; }
   const title = String(payload.title || 'Miracle');
   const options = {
-    body: String(payload.body || 'A chosen practice is waiting in the Living House.'),
+      body: String(payload.body || 'A chosen practice is waiting in Miracle Sanctuary.'),
     icon: '../assets/icon-192.png',
     badge: '../assets/icon-192.png',
     tag: String(payload.tag || 'miracle-daily-rhythm'),

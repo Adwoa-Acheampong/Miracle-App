@@ -61,7 +61,7 @@ const mojiCameo = document.getElementById('moji-cameo');
 const specialWorlds = [rhythmWorld, bibleWorld, focusWorld, bookWorld, searchWorld, trashWorld, signsWorld, nesWorld, settingsWorld];
 const growthNames = ['quiet', 'kindled', 'growing', 'rooted', 'radiant'];
 const tourSlides = [
-  { icon: 'door-open', title: 'Your life moves the house', copy: 'Prayer, work, care, and memory are the moves. The world changes only after something real is saved.' },
+  { icon: 'door-open', title: 'Your life shapes the sanctuary', copy: 'Prayer, work, care, and memory are the moves. The world changes only after something real is saved.' },
   { icon: 'sunrise', title: 'Begin at Morning Gate', copy: 'Anchor in prayer, aim at one priority, and name your honest inner weather. Nothing is prefilled or fabricated.' },
   { icon: 'map', title: 'Rooms hold your life', copy: 'Chapel, Workshop, Garden, and Archive replace the old feature wall. Swipe through objects or use the directory at any time.' },
   { icon: 'sparkles', title: 'Miracle Sparks tell the truth', copy: 'A Spark appears only after a successful save. Repeated real actions gather into permanent Miracle Signs.' },
@@ -285,7 +285,7 @@ export function createHouseUI({ world, soundscape, showToast, pulseHaptic, authS
     lastOverlayFocus = document.activeElement;
     activeRecord = record;
     activeAttachments = Array.isArray(record?.attachments) ? record.attachments.slice() : [];
-    document.getElementById('panel-room').textContent = ROOMS[feature.room]?.name || 'Living House';
+  document.getElementById('panel-room').textContent = ROOMS[feature.room]?.name || 'Miracle Sanctuary';
     document.getElementById('panel-title').textContent = record ? `Edit ${feature.name}` : feature.name;
     document.getElementById('panel-description').textContent = feature.description;
     featurePanel.hidden = false;
@@ -682,7 +682,7 @@ export function createHouseUI({ world, soundscape, showToast, pulseHaptic, authS
         <span><strong>${esc(entryTitle(result.feature, result.row))}</strong><small>${esc(result.feature.name)} · ${esc(formatWhen(result.at))}</small></span>
         <span>${icon('chevron-right', { size: 16 })}</span>
       </button>
-    `).join('') : '<p class="quiet-empty">Nothing in the house matches that yet.</p>';
+      `).join('') : '<p class="quiet-empty">Nothing in the sanctuary matches that yet.</p>';
   }
 
   async function openTrash() {
@@ -726,7 +726,7 @@ export function createHouseUI({ world, soundscape, showToast, pulseHaptic, authS
     const earned = document.getElementById('signs-earned');
     earned.innerHTML = state.signs.length ? state.signs.map(sign => `<article><span>${icon('award', { size: 20 })}</span><div><strong>${esc(sign.label)}</strong><small>${esc(sign.copy || signCopy(sign.sign))}</small></div></article>`).join('') : '<p class="quiet-empty">Miracle Signs appear when a pattern has real evidence.</p>';
     const path = document.getElementById('signs-path');
-    path.innerHTML = feed.length ? feed.map(event => `<article class="sign-event ${event.kind === 'sign' ? 'is-sign' : ''}"><span>${icon(event.kind === 'sign' ? 'award' : 'sparkles', { size: event.kind === 'sign' ? 24 : 16 })}</span><div><strong>${esc(event.label || 'Miracle Spark')}</strong><small>${esc(ROOMS[event.room]?.name || 'Living House')} · ${esc(formatWhen(event.at))}</small></div></article>`).join('') : '<p class="quiet-empty">Your first saved move will light the path here.</p>';
+    path.innerHTML = feed.length ? feed.map(event => `<article class="sign-event ${event.kind === 'sign' ? 'is-sign' : ''}"><span>${icon(event.kind === 'sign' ? 'award' : 'sparkles', { size: event.kind === 'sign' ? 24 : 16 })}</span><div><strong>${esc(event.label || 'Miracle Spark')}</strong><small>${esc(ROOMS[event.room]?.name || 'Miracle Sanctuary')} · ${esc(formatWhen(event.at))}</small></div></article>`).join('') : '<p class="quiet-empty">Your first saved move will light the path here.</p>';
   }
 
   function bindSettings() {
@@ -778,7 +778,7 @@ export function createHouseUI({ world, soundscape, showToast, pulseHaptic, authS
       settingsWorld.querySelector(`[data-setting-toggle="${key}"]`)?.setAttribute('aria-checked', values[index] ? 'true' : 'false');
     });
     const user = authSession?.user;
-    const displayName = user?.name || (authSession?.mode === 'local-guest' ? 'Local test house' : 'Miracle keeper');
+    const displayName = user?.name || (authSession?.mode === 'local-guest' ? 'Local sanctuary pilgrim' : 'Miracle keeper');
     const email = user?.email || (authSession?.mode === 'local-guest' ? 'Stored on this device' : 'Account session');
     document.getElementById('settings-account-name').textContent = displayName;
     document.getElementById('settings-account-email').textContent = email;
@@ -789,7 +789,7 @@ export function createHouseUI({ world, soundscape, showToast, pulseHaptic, authS
     await notificationsUI.render();
     const rawBuild = document.querySelector('meta[name="miracle-build"]')?.content || '';
     const build = !rawBuild || rawBuild.startsWith('__') ? 'development' : rawBuild;
-    document.getElementById('game-build-stamp').textContent = `Living House build ${build}`;
+    document.getElementById('game-build-stamp').textContent = `Miracle Sanctuary build ${build}`;
   }
 
   async function applyStoredSettings() {
@@ -850,7 +850,7 @@ export function createHouseUI({ world, soundscape, showToast, pulseHaptic, authS
       full = await streamChat(message, {
         history: historyForRequest,
         onDelta: delta => { full += delta; renderNes(full); },
-        onToolCall: data => renderNes(`${full}\n\nWorking with ${labelize(data.name || 'the house')}...`),
+          onToolCall: data => renderNes(`${full}\n\nWorking with ${labelize(data.name || 'the sanctuary')}...`),
         onError: data => { throw new Error(data.message || 'Nes could not answer.'); },
       });
       nesHistory.push({ role: 'assistant', content: full || 'I could not form an answer yet.' });
@@ -858,7 +858,7 @@ export function createHouseUI({ world, soundscape, showToast, pulseHaptic, authS
       renderNes();
     } catch (error) {
       if (!error.message.includes('authenticated')) console.error('[game] Nes failed', error);
-      nesHistory.push({ role: 'assistant', content: error.message.includes('authenticated') ? 'Sign in first so I can safely work with your house.' : 'I could not reach the lantern just now. Your message was not saved as an activity.' });
+      nesHistory.push({ role: 'assistant', content: error.message.includes('authenticated') ? 'Sign in first so I can safely work with your sanctuary.' : 'I could not reach the lantern just now. Your message was not saved as an activity.' });
       renderNes();
     } finally {
       submit.disabled = false;

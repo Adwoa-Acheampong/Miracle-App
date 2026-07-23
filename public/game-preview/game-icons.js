@@ -31,6 +31,10 @@ const EXTRA = Object.freeze({
   'door-open': '<path d="M13 4h7v16h-7"/><path d="M3 20h10V2L3 4Z"/><path d="M10 12h.01"/>',
   'wind': '<path d="M3 8h10a3 3 0 1 0-3-3"/><path d="M4 12h15a2 2 0 1 1-2 2"/><path d="M3 16h8a3 3 0 1 1-3 3"/>',
   'mail-check': '<rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/><path d="m8 16 2 2 4-4"/>',
+  'bell': '<path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/>',
+  'bell-off': '<path d="m2 2 20 20"/><path d="M13.7 21h-3.4"/><path d="M6.3 6.3A6 6 0 0 0 6 8c0 7-3 7-3 9h14"/><path d="M18 12.7V8a6 6 0 0 0-8.6-5.4"/>',
+  'triangle-alert': '<path d="M10.3 2.9 1.8 17a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 2.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4"/><path d="M12 17h.01"/>',
+  'circle-alert': '<circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/>',
 });
 
 export function icon(name, { size = 14, stroke = 1.6 } = {}) {
