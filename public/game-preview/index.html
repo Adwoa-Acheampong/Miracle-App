@@ -63,6 +63,9 @@
         <button class="icon-button" id="signs-button" type="button" aria-label="Open Miracle Signs" title="Miracle Signs">
           <span data-icon="award"></span>
         </button>
+        <button class="icon-button moji-button" id="moji-button" type="button" aria-label="Call Moji" title="Call Moji">
+          <span data-icon="user"></span>
+        </button>
         <button class="icon-button" id="sound-toggle" type="button" aria-label="Turn sound on" title="Sound">
           <span data-icon="volume"></span>
         </button>
@@ -214,24 +217,101 @@
     <section class="focus-world special-world" id="focus-world" role="dialog" aria-modal="true" aria-labelledby="focus-title" hidden>
       <div class="overlay-head">
         <button class="icon-button" type="button" data-close-special aria-label="Return to Workshop"><span data-icon="arrow-left"></span></button>
-        <div><p class="eyebrow">Workshop</p><h2 id="focus-title">Focus chamber</h2></div>
-        <button class="icon-button" type="button" id="focus-sound" aria-label="Toggle focus sound"><span data-icon="waves"></span></button>
+        <div><p class="eyebrow">Workshop · Focus Garden</p><h2 id="focus-title">Tend one faithful hour</h2></div>
+        <button class="icon-button" type="button" role="switch" aria-checked="true" id="focus-sound" aria-label="Toggle rain sounds"><span data-icon="waves"></span></button>
       </div>
-      <div class="focus-chamber">
-        <div class="focus-ring" id="focus-ring"><span id="focus-time">25:00</span><small id="focus-state">ready</small></div>
-        <label class="field-label" for="focus-label">What are you moving?</label>
-        <input id="focus-label" type="text" maxlength="140" placeholder="One clear piece of work" autocomplete="off">
-        <div class="focus-presets" role="group" aria-label="Session length">
-          <button type="button" data-focus-minutes="10">10</button>
-          <button type="button" data-focus-minutes="25" class="is-active">25</button>
-          <button type="button" data-focus-minutes="45">45</button>
+      <div class="focus-scroll">
+        <section class="focus-summary" aria-label="Focus totals">
+          <div><span>Today</span><strong id="focus-today-hours">0m</strong><small>silent focus</small></div>
+          <div><span>This week</span><strong id="focus-week-hours">0m</strong><small>faithful work</small></div>
+          <div><span>Garden</span><strong id="focus-bloom-count">0</strong><small>rewards gathered</small></div>
+        </section>
+
+        <div class="focus-workbench">
+          <section class="focus-visual" aria-label="Your growing focus reward">
+            <canvas id="focus-growth-canvas"></canvas>
+            <div class="focus-seed-copy">
+              <span id="focus-reward-kind">A seed is waiting</span>
+              <strong id="focus-reward-name">Begin to discover what will grow</strong>
+            </div>
+            <div class="focus-ring" id="focus-ring" aria-live="polite">
+              <span id="focus-time">25:00</span>
+              <small id="focus-state">ready</small>
+            </div>
+          </section>
+
+          <section class="focus-chamber" id="focus-setup">
+            <div class="focus-field">
+              <label class="field-label" for="focus-label">What are you moving?</label>
+              <input id="focus-label" type="text" maxlength="140" placeholder="One clear piece of work, prayer, or study" autocomplete="off">
+            </div>
+            <div class="focus-link-grid">
+              <label for="focus-link-type"><span>Return this work to</span><select id="focus-link-type"><option value="general">Focus log only</option><option value="task">A task</option><option value="project">A project</option><option value="prayer">A prayer</option><option value="scripture">Scripture study</option><option value="book">A book</option></select></label>
+              <label for="focus-link-target"><span>Linked record</span><select id="focus-link-target" disabled><option value="">Choose a saved record</option></select></label>
+            </div>
+            <fieldset class="focus-duration">
+              <legend>Session covenant</legend>
+              <div class="focus-presets" role="group" aria-label="Session length">
+                <button type="button" data-focus-minutes="0">Untimed</button>
+                <button type="button" data-focus-minutes="25" class="is-active">25m</button>
+                <button type="button" data-focus-minutes="45">45m</button>
+                <button type="button" data-focus-minutes="60">1h</button>
+                <button type="button" data-focus-minutes="90">90m</button>
+              </div>
+              <label class="focus-custom-time" for="focus-custom-minutes"><span>Custom minutes</span><input id="focus-custom-minutes" type="number" min="1" max="480" step="1" placeholder="e.g. 75"></label>
+            </fieldset>
+            <div class="focus-audio-station">
+              <label for="focus-music"><span>Christian lofi station</span>
+                <select id="focus-music">
+                  <option value="rain">Sanctuary rain · no music</option>
+                  <option value="silent">Silence</option>
+                  <option value="MvPgu-hwYQw">3 Hour Christian Lofi Worship · REDEFINED TV</option>
+                  <option value="P-XnYn3FUq4">Christian Lofi Playlist · REDEFINED TV</option>
+                </select>
+              </label>
+              <button type="button" role="switch" aria-checked="true" id="focus-rain-toggle"><span data-icon="cloud-rain"></span><span>Layer rain sounds</span></button>
+            </div>
+            <div class="focus-player" id="focus-player" hidden>
+              <iframe id="focus-youtube" title="Selected Christian lofi player" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
+              <p>Music streams from YouTube and needs an internet connection.</p>
+            </div>
+            <div class="focus-controls">
+              <button class="icon-button" id="focus-reset" type="button" aria-label="Reset session"><span data-icon="rotate-ccw"></span></button>
+              <button class="focus-primary" id="focus-primary" type="button" aria-label="Start focus"><span data-icon="play"></span></button>
+              <button class="icon-button" id="focus-finish" type="button" aria-label="Finish and reflect"><span data-icon="check"></span></button>
+            </div>
+            <p class="field-error" id="focus-error" role="alert"></p>
+          </section>
+
+          <section class="focus-completion" id="focus-completion" aria-labelledby="focus-completion-title" hidden>
+            <p class="eyebrow">Gather the fruit</p>
+            <h3 id="focus-completion-title">What moved during this session?</h3>
+            <label for="focus-achievement"><span>What did you achieve?</span><textarea id="focus-achievement" rows="3" maxlength="1200" placeholder="Describe the work that became real..."></textarea></label>
+            <label for="focus-milestone"><span>Milestone or next benchmark</span><input id="focus-milestone" type="text" maxlength="240" placeholder="e.g. Chapter 3 drafted; next: edit citations"></label>
+            <label for="focus-benchmark"><span>Overall progress toward the linked work</span><input id="focus-benchmark" type="range" min="0" max="100" step="5" value="0"><output id="focus-benchmark-output" for="focus-benchmark">0%</output></label>
+            <label class="focus-kept" for="focus-kept"><input id="focus-kept" type="checkbox"><span>I stayed with the focus covenant I set.</span></label>
+            <div class="focus-completion-actions">
+              <button type="button" class="text-command" id="focus-return">Return to timer</button>
+              <button type="button" class="panel-save" id="focus-save"><span>Seal session & reveal</span><span data-icon="sparkles"></span></button>
+            </div>
+            <p class="field-error" id="focus-save-error" role="alert"></p>
+          </section>
+
+          <section class="focus-reveal" id="focus-reveal" aria-labelledby="focus-reveal-title" hidden>
+            <p class="eyebrow" id="focus-reveal-kind">Focus Garden reward</p>
+            <h3 id="focus-reveal-title">A flower has opened</h3>
+            <p class="focus-scientific" id="focus-reveal-scientific"></p>
+            <dl><div><dt>Origins</dt><dd id="focus-reveal-origin"></dd></div><div><dt>Family / setting</dt><dd id="focus-reveal-family"></dd></div></dl>
+            <p id="focus-reveal-detail"></p>
+            <blockquote id="focus-reveal-scripture"></blockquote>
+            <button type="button" class="panel-save" id="focus-again"><span>Tend another session</span><span data-icon="sprout"></span></button>
+          </section>
         </div>
-        <div class="focus-controls">
-          <button class="icon-button" id="focus-reset" type="button" aria-label="Reset session"><span data-icon="rotate-ccw"></span></button>
-          <button class="focus-primary" id="focus-primary" type="button" aria-label="Start focus"><span data-icon="play"></span></button>
-          <button class="icon-button" id="focus-finish" type="button" aria-label="Finish and record"><span data-icon="check"></span></button>
-        </div>
-        <p class="field-error" id="focus-error" role="alert"></p>
+
+        <section class="focus-history-section" aria-labelledby="focus-history-title">
+          <div class="section-line"><h3 id="focus-history-title">Recent focus log</h3><span id="focus-completion-rate">0% completed</span></div>
+          <div class="focus-history" id="focus-history"><p class="quiet-empty">Your first focused minute will appear here.</p></div>
+        </section>
       </div>
     </section>
 

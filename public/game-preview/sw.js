@@ -6,6 +6,7 @@ const CORE = [
   './glass-system.css?v=__BUILD__',
   './game.js?v=__BUILD__',
   './house-ui.js?v=__BUILD__',
+  './focus-garden.js?v=__BUILD__',
   './rhythm-bible-ui.js?v=__BUILD__',
   './bible-plan.js?v=__BUILD__',
   './notifications.js?v=__BUILD__',
