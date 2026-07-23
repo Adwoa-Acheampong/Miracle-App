@@ -14,13 +14,19 @@ const nameField = document.querySelector('.auth-name');
 const passwordInput = document.getElementById('auth-password');
 const submitButton = authForm.querySelector('.auth-submit');
 const guestButton = document.getElementById('auth-guest');
-const authBlocked = [...document.getElementById('game').children].filter(element => element !== authWorld);
+const authBlocked = [...document.getElementById('game').children].filter(element => (
+  element !== authWorld && element.id !== 'notification-region'
+));
 const priorInert = new Map(authBlocked.map(element => [element, element.inert]));
 let mode = 'login';
+let localPreview = false;
 
 export async function requireGameAuth({ showToast } = {}) {
-  const local = ['localhost', '127.0.0.1'].includes(location.hostname);
-  if (local) guestButton.hidden = false;
+  localPreview = ['localhost', '127.0.0.1'].includes(location.hostname);
+  if (localPreview) {
+    guestButton.hidden = false;
+    document.getElementById('auth-local-note').hidden = false;
+  }
 
   if (isAuthed()) {
     const user = await me();
@@ -45,7 +51,7 @@ export async function requireGameAuth({ showToast } = {}) {
       authStatus.textContent = '';
       if (!email || !email.includes('@')) return fail('Enter a valid email address.');
       if (password.length < 8) return fail('Password must be at least 8 characters.');
-      if (mode === 'signup' && !name) return fail('Tell the house what to call you.');
+      if (mode === 'signup' && !name) return fail('Tell the sanctuary what to call you.');
 
       setBusy(true);
       try {
@@ -65,7 +71,11 @@ export async function requireGameAuth({ showToast } = {}) {
         }
         await enter(result.user, mode === 'signup' ? 'new-account' : 'account', resolve);
       } catch (error) {
-        fail(authMessage(error));
+        const message = authMessage(error);
+        fail(message);
+        if (localPreview && /account service|could not reach|unavailable/i.test(message)) {
+          guestButton.focus();
+        }
       } finally {
         setBusy(false);
       }
@@ -100,7 +110,7 @@ function setMode(next) {
   nameField.hidden = mode !== 'signup';
   nameField.querySelector('input').required = mode === 'signup';
   passwordInput.autocomplete = mode === 'signup' ? 'new-password' : 'current-password';
-  submitButton.querySelector('span').textContent = mode === 'signup' ? 'Create and enter' : 'Enter the house';
+  submitButton.querySelector('span').textContent = mode === 'signup' ? 'Create account & begin' : 'Begin the pilgrimage';
   document.getElementById('auth-forgot').hidden = mode === 'signup';
   authStatus.textContent = '';
   (mode === 'signup' ? nameField.querySelector('input') : document.getElementById('auth-email')).focus();
@@ -109,7 +119,7 @@ function setMode(next) {
 async function enter(user, entryMode, resolve) {
   if (entryMode === 'new-account') {
     authWorld.classList.add('is-welcoming');
-    authStatus.textContent = 'Welcome. Your house is waking.';
+    authStatus.textContent = 'Welcome. The sanctuary is waking.';
     await new Promise(done => setTimeout(done, 1500));
   }
   authWorld.hidden = true;
@@ -131,9 +141,13 @@ function setBusy(busy) {
 }
 
 function authMessage(error) {
-  const message = String(error?.message || 'Could not reach the house.');
+  const message = String(error?.message || 'Could not reach the sanctuary.');
   if (/invalid email or password|invalid credentials/i.test(message)) return 'Email or password is not correct.';
-  if (/already registered/i.test(message)) return 'That email already has a house. Log in instead.';
-  if (/failed to fetch|network/i.test(message)) return 'The house is offline. Check your connection and try again.';
+  if (/already registered/i.test(message)) return 'That email already has a sanctuary account. Log in instead.';
+  if (/failed to fetch|network|login failed|signup failed/i.test(message)) {
+    return localPreview
+      ? 'The account service is unavailable in this local preview. Begin the pilgrimage locally below.'
+      : 'The sanctuary account service is unavailable. Check your connection and try again.';
+  }
   return message;
 }

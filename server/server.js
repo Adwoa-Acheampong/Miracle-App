@@ -121,7 +121,7 @@ app.get('/sw.js', (_req, res) => {
   sendWithBuildToken(res, path.join(PUBLIC_DIR, 'sw.js'), 'application/javascript; charset=utf-8');
 });
 
-// The Living House owns a nested PWA scope. Serve its entry and modules with
+// Miracle Sanctuary owns a nested PWA scope. Serve its entry and modules with
 // the deployment token replaced just like the root shell so Railway and local
 // development receive the same cache-safe behavior as the Cloudflare build.
 app.get(['/game-preview', '/game-preview/', '/game-preview/index.html'], (_req, res) => {

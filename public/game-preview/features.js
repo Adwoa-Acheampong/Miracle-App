@@ -277,7 +277,7 @@ export const FEATURES = Object.freeze({
   },
   search: {
     id: 'search', room: 'archive', name: 'Search', verb: 'Find a memory', icon: 'search', special: 'search',
-    description: 'Search the whole house by the words you remember.',
+      description: 'Search the whole sanctuary by the words you remember.',
   },
   trash: {
     id: 'trash', room: 'archive', name: 'Trash', verb: 'Open trash', icon: 'trash-2', special: 'trash',

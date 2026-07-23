@@ -10,7 +10,16 @@ export function createNotificationsUI({ authSession, showToast }) {
   let syncTimer = 0;
 
   toggle.addEventListener('click', toggleNotifications);
-  save.addEventListener('click', savePreferences);
+  save.addEventListener('click', () => {
+    savePreferences().catch(error => {
+      status.textContent = error.message;
+      showToast(error.message, {
+        title: 'Could not save reminders',
+        tone: 'error',
+        duration: 6800,
+      });
+    });
+  });
   window.addEventListener('game:data-changed', scheduleDailyStateSync);
 
   return { render, syncDailyState };
@@ -36,10 +45,19 @@ export function createNotificationsUI({ authSession, showToast }) {
   }
 
   async function toggleNotifications() {
-    if (!authSession?.user) return showToast('Sign in before enabling cross-device reminders.');
+    if (!authSession?.user) {
+      return showToast('Sign in before enabling cross-device reminders.', {
+        title: 'Account needed',
+        tone: 'warning',
+      });
+    }
     if (subscription) return disableNotifications();
     if (!installedMode() && /iPad|iPhone|iPod/.test(navigator.userAgent)) {
-      return showToast('Add Miracle to the Home Screen, then enable reminders inside the installed app.');
+      return showToast('Add Miracle to the Home Screen, then enable reminders inside the installed app.', {
+        title: 'Install Miracle first',
+        tone: 'warning',
+        duration: 6500,
+      });
     }
     toggle.disabled = true;
     status.textContent = 'Preparing reminders...';
@@ -62,12 +80,21 @@ export function createNotificationsUI({ authSession, showToast }) {
       await savePreferences(true);
       paintToggle(true);
       status.textContent = 'Reminders can arrive while the installed app is closed.';
+      showToast('Morning invitations and follow-through reminders are ready.', {
+        title: 'Sanctuary reminders on',
+        tone: 'success',
+      });
       await syncDailyState();
     } catch (error) {
       await subscription?.unsubscribe().catch(() => {});
       subscription = null;
       paintToggle(false);
       status.textContent = error.message;
+      showToast(error.message, {
+        title: 'Reminders unavailable',
+        tone: 'error',
+        duration: 6800,
+      });
     } finally {
       toggle.disabled = false;
     }
@@ -83,6 +110,9 @@ export function createNotificationsUI({ authSession, showToast }) {
       await savePreferences(false);
       paintToggle(false);
       status.textContent = 'Reminders are off.';
+      showToast('Installed-app reminders have been turned off.', {
+        title: 'Reminders off',
+      });
     } finally {
       toggle.disabled = false;
     }
@@ -109,7 +139,10 @@ export function createNotificationsUI({ authSession, showToast }) {
       if (!response.ok) throw new Error((await response.json().catch(() => ({}))).error || 'Could not save reminder times.');
     }
     status.textContent = enabled ? 'Reminder times saved.' : 'Times saved; reminders remain off.';
-    showToast('Reminder times saved.');
+    showToast('Your morning invitation and follow-through times were saved.', {
+      title: 'Reminder times saved',
+      tone: 'success',
+    });
   }
 
   function scheduleDailyStateSync() {

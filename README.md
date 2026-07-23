@@ -1,4 +1,4 @@
-# Miracle: The Living House
+# Miracle Sanctuary
 
 Miracle is an immersive, room-based life game for faith, work, care, and memory. The original Hobonichi game is the source of truth: the 3D Morning Gate, physical doors, Atrium, Chapel, Workshop, Garden, Archive, progression systems, local data, account sync, notifications, and installable PWA all remain intact.
 
@@ -14,7 +14,7 @@ $env:PORT=3000
 npm run dev
 ```
 
-Open `http://127.0.0.1:3000/`. The root route opens the Living House at `/game-preview/`. On localhost, the auth screen offers local test mode so the complete game can be previewed without a database account.
+Open `http://127.0.0.1:3000/`. The root route opens Miracle Sanctuary at `/game-preview/`. On localhost, the auth screen offers local pilgrimage mode so the complete game can be previewed without a database account.
 
 For the static Cloudflare Pages build:
 
@@ -38,7 +38,7 @@ npx wrangler pages dev dist --port 3000
 ## Project layout
 
 ```text
-public/game-preview/   Living House UI, Three.js world, systems, PWA, and Bible corpus
+public/game-preview/   Miracle Sanctuary UI, Three.js world, systems, PWA, and Bible corpus
 public/                Shared storage, auth, icons, attachments, user, and life-domain modules
 server/                Express, MySQL, auth, sync, email, and Nes backend
 functions/             Cloudflare Pages Functions equivalents

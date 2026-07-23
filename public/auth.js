@@ -7,23 +7,23 @@ const USER_KEY    = 'miracle_session_user';
 
 // Resolve the API base, in order of precedence:
 //   1. localStorage `miracle_api_base` (per-device user override)
-//   2. localhost  → http://localhost:8080  (so local dev hits local backend)
-//   3. <meta name="miracle-api" content="..."> in index.html
-//   4. fallback   → https://api.miracleapp.site
+//   2. <meta name="miracle-api" content="..."> in index.html
+//   3. same-origin (the local/production server hosts the UI and API together)
 function resolveDefaultApi() {
-  const host = location.hostname;
-  if (host === 'localhost' || host === '127.0.0.1') return 'http://localhost:8080';
   const meta = document.querySelector('meta[name="miracle-api"]')?.content?.trim();
   if (meta) return meta.replace(/\/$/, '');
-  // Empty/missing meta → same-origin (Express serves both static and API)
   return '';
 }
 
-// Migration: wipe stale overrides pointing at the dead api.miracleapp.site subdomain.
+// Migration: wipe stale overrides pointing at retired API hosts or the old
+// localhost:8080 split-server setup. The current app serves its API same-origin.
 (function migrateStaleApiOverride() {
   try {
     const v = localStorage.getItem(API_KEY);
-    if (v && /^https?:\/\/api\.miracleapp\.site\/?$/i.test(v)) {
+    const retiredRemote = /^https?:\/\/api\.miracleapp\.site\/?$/i.test(v || '');
+    const retiredLocal = ['localhost', '127.0.0.1'].includes(location.hostname)
+      && /^https?:\/\/(?:localhost|127\.0\.0\.1):8080\/?$/i.test(v || '');
+    if (retiredRemote || retiredLocal) {
       localStorage.removeItem(API_KEY);
     }
   } catch {}
