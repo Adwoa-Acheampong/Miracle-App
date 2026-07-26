@@ -196,3 +196,12 @@ test('Nes can use OpenRouter server-side without exposing the key to the client'
   assert.match(config, /OPENROUTER_MODEL/);
   assert.doesNotMatch(client, /OPENROUTER_API_KEY/);
 });
+
+test('Cloudflare Nes can answer scripture references from the bundled Bible before calling AI', async () => {
+  const cloudflareNes = await readFile(new URL('functions/nes/[[path]].js', root), 'utf8');
+  assert.match(cloudflareNes, /answerScripture/);
+  assert.match(cloudflareNes, /parseScriptureReference/);
+  assert.match(cloudflareNes, /matthew:\s*'MAT'/);
+  assert.match(cloudflareNes, /\/game-preview\/bible\/web-c\/\$\{ref\.book\}/);
+  assert.ok(cloudflareNes.indexOf('answerScripture') < cloudflareNes.indexOf('streamNes(context, message, body)'));
+});
