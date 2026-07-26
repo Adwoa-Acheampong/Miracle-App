@@ -179,3 +179,20 @@ test('Moji can be called from the sanctuary HUD even when passive cameos are off
   assert.match(ui, /showMoji\('wave'.*\{ force: true \}/s);
   assert.match(ui, /async function showMoji\(action, message, \{ force = false \} = \{\}\)/);
 });
+
+test('Nes can use OpenRouter server-side without exposing the key to the client', async () => {
+  const [cloudflareNes, localNes, client, config] = await Promise.all([
+    readFile(new URL('functions/nes/[[path]].js', root), 'utf8'),
+    readFile(new URL('server/nes.js', root), 'utf8'),
+    readFile(new URL('public/nes-client.js', root), 'utf8'),
+    readFile(new URL('wrangler.jsonc', root), 'utf8'),
+  ]);
+  assert.match(cloudflareNes, /OPENROUTER_API_KEY/);
+  assert.match(cloudflareNes, /https:\/\/openrouter\.ai\/api\/v1\/chat\/completions/);
+  assert.match(cloudflareNes, /HTTP-Referer/);
+  assert.match(cloudflareNes, /X-OpenRouter-Title/);
+  assert.match(localNes, /OPENROUTER_API_KEY/);
+  assert.match(localNes, /rule-based-nlu\+openrouter/);
+  assert.match(config, /OPENROUTER_MODEL/);
+  assert.doesNotMatch(client, /OPENROUTER_API_KEY/);
+});

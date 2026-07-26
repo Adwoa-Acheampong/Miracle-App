@@ -9,12 +9,21 @@ import { one } from './db.js';
 
 export const nes = express.Router();
 
+const OPENROUTER_KEY = process.env.OPENROUTER_API_KEY || '';
+const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || '~openai/gpt-latest';
+const OPENROUTER_REFERER = process.env.APP_URL || 'https://miracle-app.pages.dev';
+const NES_SYSTEM_PROMPT = `You are Nes, the Miracle Sanctuary guidance tool.
+You help the user think clearly, pray thoughtfully, study Scripture, plan work, and name next actions.
+You are not the Holy Spirit, not a pastor, and not a replacement for professional advice.
+Keep responses warm, concise, practical, and faithful to the user's own records.
+If a tool action is needed, tell the user the exact place in the app to save or update it.`;
+
 // ============================================================
 // POST /nes/chat  body: { message, history? }
 // ============================================================
 nes.post('/chat', requireAuth, async (req, res) => {
   const userId = req.user.id;
-  const { message } = req.body || {};
+  const { message, history, model } = req.body || {};
 
   if (!message || typeof message !== 'string') {
     return res.status(400).json({ error: 'message is required' });
@@ -39,8 +48,15 @@ nes.post('/chat', requireAuth, async (req, res) => {
     // ── 2. Classify intent ──────────────────────────────────
     const { intent, tool, args, confidence } = classify(message);
 
+    if (OPENROUTER_KEY && (confidence < 0.4 || intent === 'unsure' || intent === 'empty')) {
+      const text = await askOpenRouter({ message, history, model });
+      for (const chunk of splitForStream(text)) send('delta', { text: chunk });
+      send('done', { stopReason: 'end_turn' });
+      return;
+    }
+
     if (confidence < 0.4 || intent === 'unsure' || intent === 'empty') {
-      const fb = pickFallback(message);
+      const fb = OPENROUTER_KEY ? pickFallback(message) : `${pickFallback(message)}\n\nTo enable free-form Nes, set OPENROUTER_API_KEY on the server.`;
       send('delta', { text: fb });
       send('done',  { stopReason: 'unsure' });
       return;
@@ -81,7 +97,7 @@ nes.post('/chat', requireAuth, async (req, res) => {
 // GET /nes/health — quick health probe
 // ============================================================
 nes.get('/health', (_req, res) => {
-  res.json({ ok: true, engine: 'rule-based-nlu', version: '1.0.0' });
+  res.json({ ok: true, engine: OPENROUTER_KEY ? 'rule-based-nlu+openrouter' : 'rule-based-nlu', model: OPENROUTER_MODEL, version: '1.1.0' });
 });
 
 // ============================================================
@@ -98,6 +114,45 @@ const FALLBACKS = [
 let _fbIdx = 0;
 function pickFallback() {
   return FALLBACKS[_fbIdx++ % FALLBACKS.length];
+}
+
+async function askOpenRouter({ message, history = [], model }) {
+  const messages = [
+    { role: 'system', content: NES_SYSTEM_PROMPT },
+    ...historyMessages(history),
+    { role: 'user', content: message },
+  ];
+  const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${OPENROUTER_KEY}`,
+      'Content-Type': 'application/json',
+      'HTTP-Referer': OPENROUTER_REFERER,
+      'X-OpenRouter-Title': 'Miracle Sanctuary',
+    },
+    body: JSON.stringify({
+      model: String(model || OPENROUTER_MODEL || '~openai/gpt-latest'),
+      messages,
+      temperature: 0.72,
+      max_tokens: 900,
+    }),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    const detail = data?.error?.message || data?.errors?.[0]?.message || `OpenRouter ${response.status}`;
+    throw new Error(detail);
+  }
+  return String(data?.choices?.[0]?.message?.content || '').trim() || 'Nes heard you, but the model returned an empty answer. Try again in a sentence or two.';
+}
+
+function historyMessages(history) {
+  if (!Array.isArray(history)) return [];
+  return history.slice(-8).map(turn => {
+    const who = String(turn?.who || turn?.role || '').toLowerCase();
+    const role = who === 'nes' || who === 'assistant' ? 'assistant' : 'user';
+    const content = String(turn?.text || turn?.content || '').slice(0, 1800).trim();
+    return content ? { role, content } : null;
+  }).filter(Boolean);
 }
 
 // Split response text at natural boundaries so the UI gets incremental updates.

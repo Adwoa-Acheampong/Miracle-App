@@ -16,6 +16,7 @@ This file documents the current game build so it can be duplicated later without
 - Primary game entry: `public/game-preview/index.html`
 - Public-domain Bible corpus: `public/game-preview/bible/web-c/`
 - Notification push key: `VAPID_PUBLIC_KEY` is expected from the Cloudflare Pages environment, not duplicated in `wrangler.jsonc`.
+- Nes AI key: `OPENROUTER_API_KEY` is expected as a secret environment variable. `OPENROUTER_MODEL` is optional and defaults to `~openai/gpt-latest`.
 
 ## Runtime Architecture
 
@@ -59,7 +60,7 @@ The frontend works offline-first. IndexedDB is the immediate source of truth for
 | Notifications | `public/game-preview/notifications.js`, `functions/notifications/[[path]].js` | Browser push subscriptions and reminder preferences. |
 | Auth | `public/game-preview/auth-ui.js`, `functions/auth/[[path]].js` | Login/signup/local preview, sessions, email verification, password/PIN recovery. |
 | Sync | `functions/sync/[[path]].js`, `functions/_lib/common.js` | Authenticated store sync to D1 `entries`. |
-| Nes | `functions/nes/[[path]].js`, `server/nes*.js` | Cloudflare placeholder chat stream plus richer local/server Nes modules. |
+| Nes | `functions/nes/[[path]].js`, `server/nes*.js` | OpenRouter-backed AI chat in production, plus local rule-based capture tools and optional OpenRouter free-form fallback. |
 | Build | `scripts/build-cloudflare.mjs` | Copies `public` to `dist`, bundles CSS, replaces `__BUILD__`, writes headers/redirects. |
 | Database | `migrations/*.sql`, `wrangler.jsonc` | D1 schema for users, sessions, entries, push subscriptions, reminder state. |
 
@@ -100,10 +101,13 @@ flowchart LR
   AuthRoute --> Users["D1 users + sessions + reset tables"]
   SyncRoute --> Entries["D1 entries table"]
   NotifyRoute --> Push["D1 push_subscriptions + reminder tables"]
-  NesRoute --> Stream["SSE response"]
+  NesRoute --> OpenRouter["OpenRouter chat completions"]
+  OpenRouter --> Stream["SSE response"]
 ```
 
 Production backend lives under `functions/`. The local Node server in `server/` mirrors the same concerns for development: auth, sync, email, Nes tools, and database setup. Cloudflare Pages uses `wrangler.jsonc` to bind D1 as `env.DB`.
+
+Nes uses `OPENROUTER_API_KEY` only on the server side. The browser never receives the key. The client keeps calling `/nes/chat`, and the backend streams Server-Sent Events back to the Nes panel.
 
 ## Bible Study Logic
 
@@ -193,8 +197,10 @@ The build script copies `public/` into `dist/`, bundles the non-game CSS into `d
 5. Run `npm run build:cloudflare`.
 6. Confirm `wrangler.jsonc` points to the intended Pages project and D1 database.
 7. Confirm Cloudflare Pages has `VAPID_PUBLIC_KEY` configured if push notifications should work.
-8. Run `npx wrangler whoami`.
-9. Deploy with `npm run deploy:cloudflare`.
+8. Add `OPENROUTER_API_KEY` if Nes should answer freely through OpenRouter.
+9. Optionally set `OPENROUTER_MODEL`; default is `~openai/gpt-latest`.
+10. Run `npx wrangler whoami`.
+11. Deploy with `npm run deploy:cloudflare`.
 
 Do not upload generated screenshots unless you intentionally want them in the repo. The game app lives in source under `public/`, production output is generated in `dist/`, and screenshots/test artifacts should remain untracked.
 
@@ -204,4 +210,5 @@ Do not upload generated screenshots unless you intentionally want them in the re
 - "Living house" language has been moved toward "Sanctuary" and "Begin the pilgrimage."
 - Focus Mode now includes timed and untimed rewards, botanical/faith data, lofi/rain controls, linked central logs, and dimensional garden rewards.
 - Bible Mode now includes verse highlighting, verse notes, devotional prompts, and passage reflections stored back into the `bible` central log.
+- Nes can use OpenRouter when `OPENROUTER_API_KEY` is configured.
 - Moji remains callable from the HUD.
