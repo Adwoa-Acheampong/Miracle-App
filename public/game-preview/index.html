@@ -193,6 +193,33 @@
         <label for="bible-chapter"><span>Chapter</span><select id="bible-chapter"></select></label>
       </div>
       <div class="bible-plan" id="bible-plan"></div>
+      <section class="bible-study-desk" aria-label="Bible study notes">
+        <div class="bible-study-head">
+          <div><p class="eyebrow">Study desk</p><strong id="bible-selected-label">Tap a verse</strong></div>
+          <div class="bible-highlight-tools" role="group" aria-label="Highlight color">
+            <button type="button" data-bible-highlight="gold" aria-label="Gold highlight"><i class="tone-gold"></i></button>
+            <button type="button" data-bible-highlight="emerald" aria-label="Emerald highlight"><i class="tone-emerald"></i></button>
+            <button type="button" data-bible-highlight="rose" aria-label="Rose highlight"><i class="tone-rose"></i></button>
+            <button type="button" data-bible-highlight="sapphire" aria-label="Sapphire highlight"><i class="tone-sapphire"></i></button>
+            <button type="button" data-bible-highlight="clear" aria-label="Clear highlight"><span data-icon="eraser"></span></button>
+          </div>
+        </div>
+        <div class="bible-note-row">
+          <textarea id="bible-verse-note" rows="2" maxlength="900" placeholder="Verse note"></textarea>
+          <button class="panel-save" id="bible-note-save" type="button"><span>Save note</span><span data-icon="pen-line"></span></button>
+        </div>
+        <article class="bible-devotional-card">
+          <div><p class="settings-kicker">Devotional</p><h3 id="bible-devotional-prompt">Choose a verse to carry into prayer.</h3></div>
+          <div class="bible-devotional-grid">
+            <textarea id="bible-observation" rows="2" maxlength="900" placeholder="Observation"></textarea>
+            <textarea id="bible-interpretation" rows="2" maxlength="900" placeholder="Meaning"></textarea>
+            <textarea id="bible-application" rows="2" maxlength="900" placeholder="Practice"></textarea>
+            <textarea id="bible-prayer" rows="2" maxlength="900" placeholder="Prayer"></textarea>
+          </div>
+          <button class="panel-save" id="bible-devotional-save" type="button"><span>Save devotional</span><span data-icon="sparkles"></span></button>
+        </article>
+        <div class="bible-note-feed" id="bible-note-feed" aria-live="polite"></div>
+      </section>
       <article class="scripture-reader" id="scripture-reader" tabindex="0" aria-live="polite"></article>
       <div class="bible-controls">
         <button class="icon-button" id="bible-prev" type="button" aria-label="Previous chapter"><span data-icon="chevron-left"></span></button>

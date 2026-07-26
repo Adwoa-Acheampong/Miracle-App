@@ -153,6 +153,7 @@ export async function saveBibleReading({ book, name, chapter, verseStart = 1, ve
   const id = `reading:WEB-C:${book}:${chapter}:${start}-${end}`;
   const saved = await put('bible', {
     id,
+    kind: 'bible-reading',
     translation: 'WEB-C',
     passage: `${name} ${chapter}:${start}${end !== start ? `-${end}` : ''}`,
     book,
@@ -169,7 +170,112 @@ export async function saveBibleReading({ book, name, chapter, verseStart = 1, ve
 }
 
 export async function listBibleReadings() {
-  return (await all('bible')).filter(row => row.translation === 'WEB-C' && row.book && Number.isFinite(Number(row.chapter)));
+  return (await all('bible')).filter(row =>
+    row.translation === 'WEB-C'
+    && row.book
+    && Number.isFinite(Number(row.chapter))
+    && Number.isFinite(Number(row.verseStart))
+    && Number.isFinite(Number(row.verseEnd))
+    && row.completedAt
+    && (!row.kind || row.kind === 'bible-reading')
+  );
+}
+
+export async function getBibleStudyForPassage(book, chapter) {
+  const rows = (await all('bible')).filter(row =>
+    row.translation === 'WEB-C'
+    && row.book === book
+    && Number(row.chapter) === Number(chapter)
+    && ['bible-highlight', 'bible-note', 'bible-devotional'].includes(row.kind)
+  );
+  return {
+    highlights: rows.filter(row => row.kind === 'bible-highlight' && !row.clearedAt).sort((a, b) => Number(a.verse) - Number(b.verse)),
+    notes: rows.filter(row => row.kind === 'bible-note').sort(newest),
+    devotionals: rows.filter(row => row.kind === 'bible-devotional').sort(newest),
+  };
+}
+
+export async function saveBibleHighlight({ book, name, chapter, verse, verseText = '', color = 'gold', note = '' }) {
+  const cleanVerse = String(verse || '').trim();
+  if (!book || !chapter || !cleanVerse) throw new Error('Choose a verse first.');
+  const allowed = new Set(['gold', 'emerald', 'rose', 'sapphire']);
+  const tone = allowed.has(color) ? color : 'gold';
+  const id = `highlight:WEB-C:${book}:${chapter}:${cleanVerse}`;
+  const saved = await put('bible', {
+    id,
+    kind: 'bible-highlight',
+    translation: 'WEB-C',
+    passage: `${name} ${chapter}:${cleanVerse}`,
+    book,
+    bookName: name,
+    chapter: Number(chapter),
+    verse: cleanVerse,
+    verseText: String(verseText || '').trim(),
+    color: tone,
+    note: String(note || '').trim(),
+  });
+  await recordSpark({ kind: 'bible-highlight', room: 'chapel', feature: 'bible', sourceStore: 'bible', sourceId: id, label: `${name} ${chapter}:${cleanVerse} highlighted` });
+  await evaluateRoomSign('chapel');
+  return saved;
+}
+
+export async function clearBibleHighlight({ book, chapter, verse }) {
+  const id = `highlight:WEB-C:${book}:${chapter}:${String(verse || '').trim()}`;
+  return del('bible', id);
+}
+
+export async function saveBibleVerseNote({ book, name, chapter, verse, verseText = '', note = '', color = 'emerald' }) {
+  const cleanNote = String(note || '').trim();
+  const cleanVerse = String(verse || '').trim();
+  if (!book || !chapter || !cleanVerse) throw new Error('Choose a verse first.');
+  if (!cleanNote) throw new Error('Write a note first.');
+  const id = `note:WEB-C:${book}:${chapter}:${cleanVerse}:${ulid()}`;
+  const saved = await put('bible', {
+    id,
+    kind: 'bible-note',
+    translation: 'WEB-C',
+    passage: `${name} ${chapter}:${cleanVerse}`,
+    book,
+    bookName: name,
+    chapter: Number(chapter),
+    verse: cleanVerse,
+    verseText: String(verseText || '').trim(),
+    note: cleanNote,
+    color,
+  });
+  await recordSpark({ kind: 'bible-note', room: 'chapel', feature: 'bible', sourceStore: 'bible', sourceId: id, label: `${name} ${chapter}:${cleanVerse} note` });
+  await evaluateRoomSign('chapel');
+  return saved;
+}
+
+export async function saveBibleDevotional({ book, name, chapter, prompt = '', selectedVerse = '', selectedText = '', observation = '', interpretation = '', application = '', prayer = '' }) {
+  const fields = {
+    observation: String(observation || '').trim(),
+    interpretation: String(interpretation || '').trim(),
+    application: String(application || '').trim(),
+    prayer: String(prayer || '').trim(),
+  };
+  if (!Object.values(fields).some(Boolean)) throw new Error('Add one devotional reflection first.');
+  const date = todayKey();
+  const id = `devotional:WEB-C:${book}:${chapter}:${date}`;
+  const saved = await put('bible', {
+    id,
+    kind: 'bible-devotional',
+    translation: 'WEB-C',
+    passage: `${name} ${chapter}`,
+    book,
+    bookName: name,
+    chapter: Number(chapter),
+    prompt: String(prompt || '').trim(),
+    selectedVerse: String(selectedVerse || '').trim(),
+    selectedText: String(selectedText || '').trim(),
+    devotionalDate: date,
+    ...fields,
+    notes: [fields.observation, fields.interpretation, fields.application, fields.prayer].filter(Boolean).join('\n\n'),
+  });
+  await recordSpark({ kind: 'bible-devotional', room: 'chapel', feature: 'bible', sourceStore: 'bible', sourceId: id, label: `${name} ${chapter} devotional` });
+  await evaluateRoomSign('chapel');
+  return saved;
 }
 
 export async function getBiblePlan() {

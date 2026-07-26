@@ -104,6 +104,27 @@ test('Bible goals expose catch-up portions and count only fully completed days',
   assert.equal(selectCurrentPlanPortion(plan, '2026-07-03')?.day, 2);
 });
 
+test('Bible study desk supports highlights, devotionals, and verse notes without changing reading coverage', async () => {
+  const [index, ui, data, styles] = await Promise.all([
+    readFile(new URL('public/game-preview/index.html', root), 'utf8'),
+    readFile(new URL('public/game-preview/rhythm-bible-ui.js', root), 'utf8'),
+    readFile(new URL('public/game-preview/data.js', root), 'utf8'),
+    readFile(new URL('public/game-preview/game.css', root), 'utf8'),
+  ]);
+  assert.match(index, /id="bible-selected-label"/);
+  assert.match(index, /data-bible-highlight="gold"/);
+  assert.match(index, /id="bible-devotional-save"/);
+  assert.match(ui, /saveBibleHighlight/);
+  assert.match(ui, /saveBibleVerseNote/);
+  assert.match(ui, /saveBibleDevotional/);
+  assert.match(ui, /selectBibleVerse/);
+  assert.match(data, /kind:\s*'bible-highlight'/);
+  assert.match(data, /kind:\s*'bible-devotional'/);
+  assert.match(data, /row\.completedAt/);
+  assert.match(styles, /\.scripture-verse\.mark-gold/);
+  assert.match(styles, /\.bible-devotional-grid/);
+});
+
 test('focus garden supports timed and untimed covenants with linked reflections', async () => {
   const [index, ui, data] = await Promise.all([
     readFile(new URL('public/game-preview/index.html', root), 'utf8'),
