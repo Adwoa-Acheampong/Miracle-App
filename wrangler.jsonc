@@ -7,7 +7,6 @@
     "APP_URL": "https://miracle-app.pages.dev",
     "BUILD_TOKEN": "cloudflare-local",
     "EMAIL_FROM": "miracle <noreply@miracleapp.site>",
-    "VAPID_PUBLIC_KEY": "BCPCktcyjYftu7XCTjUVdHsI1TxrJQSQDgUHudAyaLtsKapk9T82QdfZDMoiscOzeggh5Pgn1BsOUfQ3CdfDXnw",
     "CLOUDFLARE_ACCOUNT_ID": "a8eab5d3dd5b1612de85cce6e49ec386"
   },
   "d1_databases": [

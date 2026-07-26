@@ -15,6 +15,7 @@ This file documents the current game build so it can be duplicated later without
 - Cloudflare config: `wrangler.jsonc`
 - Primary game entry: `public/game-preview/index.html`
 - Public-domain Bible corpus: `public/game-preview/bible/web-c/`
+- Notification push key: `VAPID_PUBLIC_KEY` is expected from the Cloudflare Pages environment, not duplicated in `wrangler.jsonc`.
 
 ## Runtime Architecture
 
@@ -191,8 +192,9 @@ The build script copies `public/` into `dist/`, bundles the non-game CSS into `d
 4. Run `npm test`.
 5. Run `npm run build:cloudflare`.
 6. Confirm `wrangler.jsonc` points to the intended Pages project and D1 database.
-7. Run `npx wrangler whoami`.
-8. Deploy with `npm run deploy:cloudflare`.
+7. Confirm Cloudflare Pages has `VAPID_PUBLIC_KEY` configured if push notifications should work.
+8. Run `npx wrangler whoami`.
+9. Deploy with `npm run deploy:cloudflare`.
 
 Do not upload generated screenshots unless you intentionally want them in the repo. The game app lives in source under `public/`, production output is generated in `dist/`, and screenshots/test artifacts should remain untracked.
 
