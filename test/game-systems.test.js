@@ -104,6 +104,27 @@ test('Bible goals expose catch-up portions and count only fully completed days',
   assert.equal(selectCurrentPlanPortion(plan, '2026-07-03')?.day, 2);
 });
 
+test('Bible study desk supports highlights, devotionals, and verse notes without changing reading coverage', async () => {
+  const [index, ui, data, styles] = await Promise.all([
+    readFile(new URL('public/game-preview/index.html', root), 'utf8'),
+    readFile(new URL('public/game-preview/rhythm-bible-ui.js', root), 'utf8'),
+    readFile(new URL('public/game-preview/data.js', root), 'utf8'),
+    readFile(new URL('public/game-preview/game.css', root), 'utf8'),
+  ]);
+  assert.match(index, /id="bible-selected-label"/);
+  assert.match(index, /data-bible-highlight="gold"/);
+  assert.match(index, /id="bible-devotional-save"/);
+  assert.match(ui, /saveBibleHighlight/);
+  assert.match(ui, /saveBibleVerseNote/);
+  assert.match(ui, /saveBibleDevotional/);
+  assert.match(ui, /selectBibleVerse/);
+  assert.match(data, /kind:\s*'bible-highlight'/);
+  assert.match(data, /kind:\s*'bible-devotional'/);
+  assert.match(data, /row\.completedAt/);
+  assert.match(styles, /\.scripture-verse\.mark-gold/);
+  assert.match(styles, /\.bible-devotional-grid/);
+});
+
 test('focus garden supports timed and untimed covenants with linked reflections', async () => {
   const [index, ui, data] = await Promise.all([
     readFile(new URL('public/game-preview/index.html', root), 'utf8'),
@@ -157,4 +178,30 @@ test('Moji can be called from the sanctuary HUD even when passive cameos are off
   assert.match(index, /id="moji-button"/);
   assert.match(ui, /showMoji\('wave'.*\{ force: true \}/s);
   assert.match(ui, /async function showMoji\(action, message, \{ force = false \} = \{\}\)/);
+});
+
+test('Nes can use OpenRouter server-side without exposing the key to the client', async () => {
+  const [cloudflareNes, localNes, client, config] = await Promise.all([
+    readFile(new URL('functions/nes/[[path]].js', root), 'utf8'),
+    readFile(new URL('server/nes.js', root), 'utf8'),
+    readFile(new URL('public/nes-client.js', root), 'utf8'),
+    readFile(new URL('wrangler.jsonc', root), 'utf8'),
+  ]);
+  assert.match(cloudflareNes, /OPENROUTER_API_KEY/);
+  assert.match(cloudflareNes, /https:\/\/openrouter\.ai\/api\/v1\/chat\/completions/);
+  assert.match(cloudflareNes, /HTTP-Referer/);
+  assert.match(cloudflareNes, /X-OpenRouter-Title/);
+  assert.match(localNes, /OPENROUTER_API_KEY/);
+  assert.match(localNes, /rule-based-nlu\+openrouter/);
+  assert.match(config, /OPENROUTER_MODEL/);
+  assert.doesNotMatch(client, /OPENROUTER_API_KEY/);
+});
+
+test('Cloudflare Nes can answer scripture references from the bundled Bible before calling AI', async () => {
+  const cloudflareNes = await readFile(new URL('functions/nes/[[path]].js', root), 'utf8');
+  assert.match(cloudflareNes, /answerScripture/);
+  assert.match(cloudflareNes, /parseScriptureReference/);
+  assert.match(cloudflareNes, /matthew:\s*'MAT'/);
+  assert.match(cloudflareNes, /\/game-preview\/bible\/web-c\/\$\{ref\.book\}/);
+  assert.ok(cloudflareNes.indexOf('answerScripture') < cloudflareNes.indexOf('streamNes(context, message, body)'));
 });

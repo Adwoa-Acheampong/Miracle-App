@@ -9,6 +9,11 @@ import {
   completeTask,
   listBibleReadings,
   saveBibleReading,
+  getBibleStudyForPassage,
+  saveBibleHighlight,
+  clearBibleHighlight,
+  saveBibleVerseNote,
+  saveBibleDevotional,
   getBiblePlan,
   saveBiblePlan,
   todayKey,
@@ -64,6 +69,14 @@ const OFFERINGS = Object.freeze([
   { book: 'ECC', chapter: 3, verse: 1, prompt: 'Notice the season. Choose a fitting action, not every action.' },
 ]);
 
+const DEVOTIONAL_PROMPTS = Object.freeze([
+  'What does this passage reveal about the character of God?',
+  'What invitation, warning, or comfort is asking for a response today?',
+  'Where does this word meet your actual life this week?',
+  'What should be carried into prayer before you move on?',
+  'What obedience would make this passage visible by tonight?',
+]);
+
 const PRACTICE_FEATURE = Object.freeze({
   devotion: 'prayer', priority: 'tasks', mood: 'daily', dream: 'dreams', schedule: 'schedule', meal: 'meals', song: 'music', word: 'prophecy',
 });
@@ -78,6 +91,10 @@ export function createRhythmBibleUI({ openSpecial, openFeature, showToast, sound
   let currentChapter = 1;
   let activeRange = null;
   let speech = null;
+  let currentChapterData = null;
+  let studyState = { highlights: [], notes: [], devotionals: [] };
+  let selectedVerse = null;
+  let selectedHighlightColor = 'gold';
 
   bindRhythm();
   bindBible();
@@ -203,12 +220,14 @@ export function createRhythmBibleUI({ openSpecial, openFeature, showToast, sound
       currentBook = event.target.value;
       currentChapter = 1;
       activeRange = null;
+      selectedVerse = null;
       hydrateChapterSelect();
       await renderBible();
     });
     document.getElementById('bible-chapter').addEventListener('change', async event => {
       currentChapter = Number(event.target.value);
       activeRange = null;
+      selectedVerse = null;
       await renderBible();
     });
     document.getElementById('bible-prev').addEventListener('click', () => moveChapter(-1));
@@ -236,6 +255,16 @@ export function createRhythmBibleUI({ openSpecial, openFeature, showToast, sound
       const portion = plan?.portions?.[Number(button.dataset.planPortion)];
       if (portion) await openBible({ book: portion.book || plan.book || 'TOB', chapter: portion.chapter, range: portion });
     });
+    reader.addEventListener('click', event => {
+      const verse = event.target.closest('.scripture-verse');
+      if (!verse) return;
+      selectBibleVerse(verse.dataset.verse);
+    });
+    document.querySelectorAll('[data-bible-highlight]').forEach(button => {
+      button.addEventListener('click', () => applyBibleHighlight(button.dataset.bibleHighlight));
+    });
+    document.getElementById('bible-note-save').addEventListener('click', saveSelectedVerseNote);
+    document.getElementById('bible-devotional-save').addEventListener('click', saveCurrentDevotional);
   }
 
   function hydrateBibleSelectors() {
@@ -253,18 +282,31 @@ export function createRhythmBibleUI({ openSpecial, openFeature, showToast, sound
   async function renderBible() {
     stopAudio();
     const chapter = await fetchChapter(currentBook, currentChapter);
+    currentChapterData = chapter;
+    studyState = await getBibleStudyForPassage(currentBook, currentChapter);
     const rangeStart = Number(activeRange?.verseStart || 1);
     const rangeEnd = Number(activeRange?.verseEnd || chapter.verses.at(-1)?.number || 1);
+    const highlightMap = new Map(studyState.highlights.map(mark => [String(mark.verse), mark]));
+    const noteVerses = new Set(studyState.notes.map(note => String(note.verse)));
     document.getElementById('bible-title').textContent = `${chapter.name} ${chapter.chapter}`;
     reader.innerHTML = `<header><p>World English Bible Catholic Edition</p><h3>${esc(chapter.name)} ${chapter.chapter}</h3></header>${chapter.verses.map(verse => {
       const number = Number(String(verse.number).split('-')[0]);
       const due = activeRange && number >= rangeStart && number <= rangeEnd;
-      return `<p class="scripture-verse ${due ? 'is-due' : ''}" data-verse="${esc(verse.number)}"><sup>${esc(verse.number)}</sup>${esc(verse.text)}</p>`;
+      const mark = highlightMap.get(String(verse.number));
+      const classes = [
+        'scripture-verse',
+        due ? 'is-due' : '',
+        mark ? `mark-${mark.color || 'gold'}` : '',
+        noteVerses.has(String(verse.number)) || mark?.note ? 'has-note' : '',
+        selectedVerse?.number === String(verse.number) ? 'is-selected' : '',
+      ].filter(Boolean).join(' ');
+      return `<p class="${classes}" data-verse="${esc(verse.number)}"><sup>${esc(verse.number)}</sup>${esc(verse.text)}</p>`;
     }).join('')}<footer>Public domain text. Source: eBible.org.</footer>`;
     const existing = readings.some(row => row.book === currentBook && Number(row.chapter) === currentChapter && Number(row.verseStart) <= rangeStart && Number(row.verseEnd) >= rangeEnd);
     const complete = document.getElementById('bible-complete');
     complete.disabled = existing;
     complete.querySelector('span').textContent = existing ? 'Read' : activeRange ? "Complete today's verses" : 'Mark chapter read';
+    renderBibleStudyDesk(chapter);
     await renderBiblePlan();
     if (activeRange) reader.querySelector('.is-due')?.scrollIntoView({ block: 'start' });
   }
@@ -276,8 +318,104 @@ export function createRhythmBibleUI({ openSpecial, openFeature, showToast, sound
     else if (direction > 0 && manifest.books[bookIndex + 1]) { currentBook = manifest.books[bookIndex + 1].id; currentChapter = 1; }
     else if (direction < 0 && manifest.books[bookIndex - 1]) { currentBook = manifest.books[bookIndex - 1].id; currentChapter = manifest.books[bookIndex - 1].chapters; }
     activeRange = null;
+    selectedVerse = null;
     hydrateBibleSelectors();
     await renderBible();
+  }
+
+  function selectBibleVerse(number) {
+    const verse = currentChapterData?.verses.find(item => String(item.number) === String(number));
+    if (!verse) return;
+    selectedVerse = { number: String(verse.number), text: verse.text };
+    reader.querySelectorAll('.scripture-verse').forEach(node => node.classList.toggle('is-selected', node.dataset.verse === selectedVerse.number));
+    renderBibleStudyDesk(currentChapterData);
+    pulseHaptic(4);
+  }
+
+  async function applyBibleHighlight(color) {
+    if (!selectedVerse || !currentChapterData) return showToast('Tap a verse first.');
+    if (color === 'clear') {
+      await clearBibleHighlight({ book: currentBook, chapter: currentChapter, verse: selectedVerse.number });
+      showToast(`${currentChapterData.name} ${currentChapter}:${selectedVerse.number} cleared.`);
+    } else {
+      selectedHighlightColor = color || selectedHighlightColor;
+      await saveBibleHighlight({
+        book: currentBook,
+        name: currentChapterData.name,
+        chapter: currentChapter,
+        verse: selectedVerse.number,
+        verseText: selectedVerse.text,
+        color: selectedHighlightColor,
+        note: document.getElementById('bible-verse-note').value,
+      });
+      soundscape.confirm?.(0.4);
+      showToast(`${currentChapterData.name} ${currentChapter}:${selectedVerse.number} highlighted.`);
+    }
+    await renderBible();
+  }
+
+  async function saveSelectedVerseNote() {
+    if (!selectedVerse || !currentChapterData) return showToast('Tap a verse first.');
+    const noteInput = document.getElementById('bible-verse-note');
+    await saveBibleVerseNote({
+      book: currentBook,
+      name: currentChapterData.name,
+      chapter: currentChapter,
+      verse: selectedVerse.number,
+      verseText: selectedVerse.text,
+      note: noteInput.value,
+      color: selectedHighlightColor,
+    });
+    noteInput.value = '';
+    soundscape.confirm?.(0.8);
+    showToast('Bible note saved.');
+    await renderBible();
+  }
+
+  async function saveCurrentDevotional() {
+    if (!currentChapterData) return;
+    await saveBibleDevotional({
+      book: currentBook,
+      name: currentChapterData.name,
+      chapter: currentChapter,
+      prompt: devotionalPrompt(),
+      selectedVerse: selectedVerse?.number || '',
+      selectedText: selectedVerse?.text || '',
+      observation: document.getElementById('bible-observation').value,
+      interpretation: document.getElementById('bible-interpretation').value,
+      application: document.getElementById('bible-application').value,
+      prayer: document.getElementById('bible-prayer').value,
+    });
+    ['bible-observation', 'bible-interpretation', 'bible-application', 'bible-prayer'].forEach(id => { document.getElementById(id).value = ''; });
+    soundscape.confirm?.(1);
+    showToast('Devotional saved to Bible notes.');
+    await renderBible();
+  }
+
+  function renderBibleStudyDesk(chapter) {
+    const selected = selectedVerse;
+    const selectedMark = selected ? studyState.highlights.find(mark => String(mark.verse) === selected.number) : null;
+    if (selectedMark?.color) selectedHighlightColor = selectedMark.color;
+    document.getElementById('bible-selected-label').textContent = selected ? `${chapter.name} ${chapter.chapter}:${selected.number}` : 'Tap a verse';
+    document.getElementById('bible-devotional-prompt').textContent = devotionalPrompt();
+    const noteInput = document.getElementById('bible-verse-note');
+    if (selected && document.activeElement !== noteInput) noteInput.value = selectedMark?.note || '';
+    if (!selected && document.activeElement !== noteInput) noteInput.value = '';
+    document.querySelectorAll('[data-bible-highlight]').forEach(button => {
+      button.classList.toggle('is-active', selected && button.dataset.bibleHighlight === selectedHighlightColor);
+    });
+    const feed = document.getElementById('bible-note-feed');
+    const items = [
+      ...studyState.notes.map(note => ({ type: `Note ${chapter.chapter}:${note.verse}`, text: note.note, at: note.updatedAt })),
+      ...studyState.devotionals.map(note => ({ type: `Devotional ${note.devotionalDate || ''}`, text: note.notes || note.application || note.observation, at: note.updatedAt })),
+      ...studyState.highlights.filter(mark => mark.note).map(mark => ({ type: `Highlight ${chapter.chapter}:${mark.verse}`, text: mark.note, at: mark.updatedAt })),
+    ].sort((a, b) => String(b.at || '').localeCompare(String(a.at || ''))).slice(0, 5);
+    feed.innerHTML = items.length ? items.map(item => `<article><strong>${esc(item.type)}</strong><p>${esc(String(item.text || '').slice(0, 180))}</p></article>`).join('') : '<article><strong>Quiet page</strong><p>No notes saved for this chapter yet.</p></article>';
+  }
+
+  function devotionalPrompt() {
+    if (selectedVerse) return `Carry verse ${selectedVerse.number}: ${DEVOTIONAL_PROMPTS[dayIndex(DEVOTIONAL_PROMPTS.length)]}`;
+    return DEVOTIONAL_PROMPTS[(dayIndex(DEVOTIONAL_PROMPTS.length) + currentChapter) % DEVOTIONAL_PROMPTS.length];
   }
 
   async function markCurrentReading() {
